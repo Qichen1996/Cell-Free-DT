@@ -5,6 +5,7 @@
 *.h5
 *.sql
 *.parquet
+*.pkl
 *-checkpoint.py
 .ipynb_checkpoints/
 /.vscode/

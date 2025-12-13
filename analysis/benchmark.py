@@ -36,6 +36,7 @@ df.head()
 
 # %%
 group = 'baselines'
+group = 'dt'
 # group = 'antenna'
 # group = 'pc'
 columns = ['actual_rate',
@@ -54,11 +55,13 @@ columns = ['actual_rate',
 
 def refactor(df):
     if group == 'baselines':
-        df = df.rename({'fixed': 'Always-on', 'mappo_w_qos=60.0_w_pc=0.4': 'MAPPO', 'simple1': 'Auto-SM1', 'dqn_w_qos=20.0_w_pc=1.0': 'DQN', 'simple': 'Auto-SM+'})
+        df = df.rename({'fixed': 'Always-on', 'mappo': 'MAPPO', 'simple1': 'Auto-SM1', 'dqn_w_qos=20.0_w_pc=1.0': 'DQN', 'simple': 'Auto-SM+'})
     elif group == 'baselines-no-offload':
         df = df.rename({'mappo_no_offload=True': 'MAPPO', 'fixed_no_offload=True': 'Always-on', 'simple1_no_offload=True': 'Auto-SM1', 'dqn_no_offload=True': 'DQN'})
     elif group == 'pc':
         df = df.rename({'fixed_gamma': 'All-gamma', 'simple1_gamma': 'Auto-gamma', 'fixed_ab': 'All-both', 'simple1_ab': 'Auto-both', 'fixed_rate': 'All-rate', 'simple1_rate': 'Auto-rate', 'mappo_w_qos=40.0_w_pc=0.8': 'ppo'})
+    elif group == 'dt':
+        df = df.rename({'fixed': 'Always-on', 'dt': 'DT', 'mappo': 'MAPPO', 'simple1': 'Auto-SM1'})
     elif group == 'w':
         df = df.rename({'mappo_w_qos=40.0': 'STEP11_SM0,3'})
     elif group == 'antenna':
@@ -99,15 +102,14 @@ def refactor(df):
 
 if group in ['baselines', 'baselines-no-offload']:
     # policies = ['Ant-16', 'Ant-8', 'SM0/1', 'SM0/3', 'Fixed-cluster', 'Always-on', 'Joint-SM-Ant']
-    policies = ['Always-on', 'Auto-SM1', 'MAPPO', 'DQN']
+    policies = ['MAPPO', 'Always-on']
 elif group == 'pc':
     policies = ['All-both', 'All-gamma', 'Auto-both', 'Auto-gamma', 'ppo']
-elif group == 'w':
-    policies = ['STEP11_SM0,3']
+elif group == 'dt':
+    policies = 'Always-on Auto-SM1 MAPPO DT'.split()
+    policies = 'Always-on MAPPO'.split()
 elif group == 'antenna':
     policies = ['All-on','Fixed','MAPPO']
-elif group == 'antenna':
-    policies = 'Ant10 Ant16'.split()
 elif group == 'wqos':
     policies = '1 4 7'.split()
 elif group == 'interf':
@@ -119,31 +121,32 @@ elif group == 'sm':
 else:
     raise ValueError
 
-win_sz = len(df0.loc[(df0.index[0][0], 'B')]) // 168
+win_sz = len(df0.sort_index().loc[(df0.index[0][0], 'B')]) // 168
 df = refactor(df0)
 
 # %%
 name_maps = {
     'pc_kw': 'Power Consumption (kW)',
     'drop_ratio': 'drop ratio',
+    'ue_drop_ratio': 'ue drop ratio',
     'reward': 'reward',
     # 'cluster_size': 'cluster_size',
-    'se': 'avg_se',
+    # 'se': 'avg_se',
     'qos_reward': 'qos',
-    "idle_ues": 'idle',
-    "active_ues": 'active',
-    "queued_ues": 'wait',
+    # "idle_ues": 'idle',
+    'active_ues': 'active',
+    # "queued_ues": 'wait',
     "required_rate": 'required rate',
     'signal_power': 'signal power',
     'interference': 'interference',
     'actual_rate': 'data rate (Mb/s)',
     'arrival_rate': 'Demand rate (Mb/s)',
-    'sum_tx_power': 'total transmit power (W)',
+    # 'sum_tx_power': 'total transmit power (W)',
     'avg_antennas': 'Average active antennas per AP',
     'sm0_cnt': 'active BSs', 'sm1_cnt': 'BSs in SM1',
     'sm2_cnt': 'BSs in SM2', 'sm3_cnt': 'BSs in SM3'
 }
-for i in range(25):
+for i in range(4):
     name_maps[f'bs_{i}_n_ants'] = f'antennas (BS {i})'
 vars_df = df.loc[policies, list(name_maps)].rename(columns=name_maps).copy()
 vars_df['energy efficiency (kb/J)'] = vars_df['data rate (Mb/s)'] / (
@@ -151,6 +154,10 @@ vars_df['energy efficiency (kb/J)'] = vars_df['data rate (Mb/s)'] / (
 # vars_df = vars_df.iloc[::win_sz]
 # vars_df.to_csv('filename1.csv', index=True)
 vars_df = vars_df.rolling(win_sz).mean().shift(-59)[::win_sz]
+# vars_df = (
+#     vars_df.groupby(['policy', 'scenario'], group_keys=False)
+#             .apply(lambda df: df.rolling(win_sz).mean().shift(-59)[::win_sz])
+# )
 # vars_df = vars_df.rolling(win_sz).mean()[win_sz::win_sz]
 # vars_df.to_csv('filename.csv', index=True)
 vars_df['signal power (dB)'] = 10 * np.log10(vars_df.pop('signal power') + 1e-99)
@@ -167,6 +174,7 @@ stats
 #fig.write_image("random.pdf")
 
 # %%
+os.makedirs('sim_plots', exist_ok=True)
 for scenario in vars_df.index.levels[1]:
     _sdf = vars_df.xs(scenario, level=1)
     idx = _sdf.index.get_level_values(1).drop_duplicates()
@@ -282,6 +290,9 @@ for scenario in vars_df.index.levels[1]:
         if key == "drop ratio":
             print(key)
             print(ser.groupby('policy').mean())
+        elif key == "ue drop ratio":
+            print(key)
+            print(ser.groupby('policy').mean())
         elif key == "Power Consumption (kW)":
             print(key)
             print(ser.groupby('policy').mean())
@@ -320,7 +331,7 @@ for scenario in vars_df.index.levels[1]:
         fig.update_yaxes(exponentformat='power')  # range=[ymin, ymax]
         key = key.replace('/', 'p')
         fig.update_xaxes(dtick=2)
-        # fig.write_image(f'sim_plots/{group}_{scenario}_{key}.pdf', scale=2)
+        fig.write_image(f'sim_plots/{group}_{scenario}_{key}.pdf', scale=2)
         fig1 = px.line(_df1, labels={'value': key, 'time': 'Time'})
         fig1.update_layout(
             font=dict(

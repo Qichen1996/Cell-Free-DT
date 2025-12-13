@@ -22,4 +22,4 @@ numConnModes = 3
 # delayWeight = 0.1  # penalty for average delay = delay budget
 pcWeight = 0.5  # PC (unit: W) penalty weight
 qosWeight = 4  # QoS reward weight
-extraQosWeight = 0.005 # QoS reward weight for done UEs
+extraQosWeight = 0 # QoS reward weight for done UEs

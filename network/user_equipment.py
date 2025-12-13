@@ -89,7 +89,7 @@ class UserEquipment:
         for i in self._sorted_bss:
             cumulative_gain += self._gains[i]
             self._cover_bss.add(self.net.get_bs(i))
-            if cumulative_gain >= 0.90 * total_gain:
+            if cumulative_gain >= 0.95 * total_gain:
                 break
         self.cluster_size = len(self._cover_bss)
         for b in self._cover_bss:
@@ -117,7 +117,7 @@ class UserEquipment:
         S = 0
         for b in self.bss:
             if self in b.ues.values():
-                S += np.sqrt((b.num_ant - b.tau_sl) * b.power_alloc[self.id] * self._gamma[b.id])     
+                S += np.sqrt((b.num_ant - b.tau_sl) * b.power_alloc[self.id] * self._gamma[b.id])
         return S ** 2
     
     @property
@@ -272,11 +272,13 @@ class UserEquipment:
     def quit(self):
         self.disconnect()
         if self.demand > 0.:
-            for b in self._cover_bss:
-                b._ue_stats[0] += [1, self.delay / self.delay_budget]
+            for b in self._cover_bss:  
+                b._ue_stats[1] += [1, self.demand / self.total_demand]
+                # b._ue_stats[0] += [1, self.delay / self.delay_budget]
         else:
             for b in self._cover_bss:
-                b._ue_stats[1] += [1, self.demand / self.total_demand]
+                b._ue_stats[0] += [1, self.delay / self.delay_budget]
+                # b._ue_stats[1] += [1, self.demand / self.total_demand]
         for b in list(self._cover_bss):
             b.remove_from_cell(self)
             self._cover_bss.remove(b)

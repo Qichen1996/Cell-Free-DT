@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from gym.spaces import MultiDiscrete
 from network.base_station import BaseStation as BS
 from env.config import timeStep, actionInterval
 
@@ -19,10 +18,9 @@ class SimplePolicy:
         def single_act(id, obs):
             info = BS.annotate_obs(obs)
             sm = info['sleep_mode']
-            next_sm = info['next_sleep_mode']
+            # next_sm = info['next_sleep_mode']
             wakeup_time = info['wakeup_time']
             thrp_req_queue = info['queued_sum_rate_req']
-            thrp_req_idle = info['idle_sum_rate_req']
             thrp_req = info['serving_sum_rate_req']
             thrp = info['serving_sum_rate']
             new_sm = sm
@@ -46,14 +44,15 @@ class SimplePolicy:
                 self._sleep_steps[id] = 0
                 if thrp_req == 0:
                     new_sm = 1
-                elif thrp / thrp_req > 55:   # 75 45
+                elif thrp / thrp_req > 40:   # 75 45
                     # self._ant_steps[id] += 1
                     # if self._ant_steps[id] >= 180:
                     ant_switch = -1
                         # self._ant_steps[id] = 0
-                elif thrp / thrp_req < 45:
+                elif thrp / thrp_req < 20:
                     ant_switch = 1
-            return [ant_switch + 1, new_sm]
+            return [2, new_sm, 2]
+            # return [ant_switch + 1]
         return list(map(single_act, range(self.num_agents), obs))
 
 

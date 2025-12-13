@@ -82,8 +82,8 @@ class MultiCellNetEnv(MultiAgentEnv):
         self.observation_space = [self.net.bs_obs_space
                                   for _ in range(self.num_agents)]
         self.cent_observation_space = self.net.net_obs_space
-        # self.cent_observation_space = [self.net.net_obs_space
-        #                                for _ in range(self.num_agents)]
+        self.cent_observation_space = [self.net.net_obs_space
+                                       for _ in range(self.num_agents)]
         
         
         self.action_space = [MultiDiscrete(BaseStation.action_dims)
@@ -117,7 +117,7 @@ class MultiCellNetEnv(MultiAgentEnv):
                        self.action_interval * self._dt * self.net.accelerate / 60))
         notice('Episode length: {}'.format(self.episode_len))
         notice('Episode time length: {} h'.format(self.episode_time_len / 3600))
-        # notice('Power consumption weight: {}'.format(self.w_pc))
+        notice('Power consumption weight: {}'.format(self.w_pc))
         notice('QoS weight: {}'.format(self.w_qos))
         notice('Extra QoS weight: {}'.format(self.w_xqos))
         # notice('Drop ratio weight: {}'.format(self.w_drop))
@@ -125,7 +125,7 @@ class MultiCellNetEnv(MultiAgentEnv):
         notice('Observation space: {}'.format(
             (self.num_agents, *self.observation_space[0].shape)))
         notice('Central observation space: {}'.format(
-            self.cent_observation_space.shape))
+            self.cent_observation_space[0].shape))
         notice('Action space: {}'.format(
             (self.num_agents, self.action_space[0].shape)))
         notice('Seed: {}'.format(self._seed))
@@ -148,17 +148,20 @@ class MultiCellNetEnv(MultiAgentEnv):
         pc_kw = pc * 1e-3
         n = n_done + n_drop + 1e-6
         r_qos = (-n_drop * q_drop + self.w_xqos * n_done * (1 - q_del)) / n
+        r_qos = - q_drop
         reward = self.w_qos * r_qos - pc_kw * self.w_pc      # dqn 0.1 mappo 0.4 0.5
         bs_reward = [self.net.get_bs_reward(i) for i in range(self.num_agents)]
+        reward = np.mean(bs_reward)
         se_list = [ue.SE for ue in self.net.ues.values()]
         avg_se = np.mean(se_list) if se_list else 0
+        arrival_rate = self.net.arrival_rates.sum()
         # dropped = dr @ self.w_drop_cats
         # delay = dl @ self.w_delay_cats
         # reward = -(self.w_drop * dropped + self.w_pc * pc + self.w_delay * delay)
         r_info = dict(
             drop_ratio=q_drop,
             ue_drop_ratio=n_drop / n,
-            # cluster_size=self.net.cluster_size,
+            arrival_rate=arrival_rate,
             avg_se=avg_se,
             delay_ratio=q_del,
             qos_reward=r_qos,
@@ -173,7 +176,7 @@ class MultiCellNetEnv(MultiAgentEnv):
             # r_info['drop_ratios'] = dr
             # r_info['ue_delays'] = dl
         self._reward_stats.append(r_info)
-        return reward
+        return bs_reward
 
     def get_obs_agent(self, agent_id):
         return self.net.observe_bs(agent_id)
@@ -181,11 +184,11 @@ class MultiCellNetEnv(MultiAgentEnv):
     def get_centobs_agent(self, agent_id):
         return self.net.observe_bs_network(agent_id)
 
-    # def get_cent_obs(self):
-    #     return [self.get_centobs_agent(i) for i in range(self.num_agents)]
-
     def get_cent_obs(self):
-        return [self.net.observe_network()]
+        return [self.get_centobs_agent(i) for i in range(self.num_agents)]
+
+    # def get_cent_obs(self):
+    #     return [self.net.observe_network()]
     
     def reset(self, render_mode=None):
         # self.seed()
@@ -202,7 +205,6 @@ class MultiCellNetEnv(MultiAgentEnv):
     
     def step(self, actions=None, substeps=action_interval, 
              render_mode=None, render_interval=1):
-        # print(len(self.net.ues))
         if EVAL:
             info(f'\nStep {self._sim_steps}:\n')
             info('traffic distribution: %s',
@@ -211,7 +213,6 @@ class MultiCellNetEnv(MultiAgentEnv):
         self.net.reset_stats()
         
         if actions is not None:
-            # self.net.set_cluster_size(int(round(np.mean([action[-1] - 1 for action in actions]))))
             for i in range(self.num_agents):
                 self.net.set_action(i, actions[i])
         for i in range(substeps):
@@ -232,7 +233,7 @@ class MultiCellNetEnv(MultiAgentEnv):
         cent_obs = self.get_cent_obs()
         rewards = self.get_reward(cent_obs[0])
 
-        rewards = [[rewards]]  # shared reward for all agents
+        # rewards = [[rewards]]  # shared reward for all agents
 
         done = self._episode_steps >= self.episode_len
         infos = {}
@@ -253,8 +254,8 @@ class MultiCellNetEnv(MultiAgentEnv):
             if TRAIN:  # only for training logging
                 infos['step_rewards'] = self._reward_stats
                 infos['sm3_ratio'] = self.net.avg_sleep_ratios()[3]
-                infos['cm1_ratio'] = self.net.avg_conn_ratios()[2]
-                infos['cm0_ratio'] = self.net.avg_conn_ratios()[1]
+                infos['sm2_ratio'] = self.net.avg_sleep_ratios()[2]
+                infos['sm1_ratio'] = self.net.avg_sleep_ratios()[1]
 
             notice('Episode %d finished at %s', self._episode_count, self.net.world_time_repr)
         
@@ -263,20 +264,21 @@ class MultiCellNetEnv(MultiAgentEnv):
     def info_dict(self):
         info = self.net.info_dict(include_bs=self.include_bs_info)
         info.update(
-            # bs1_pc = self._sim_steps and bs1_pc,
-            # bs1_ue = self._sim_steps and bs1_ue,
             reward = self._sim_steps and self._reward_stats[-1]['reward'],
             pc_kw = self._sim_steps and self._reward_stats[-1]['pc_kw'],
-            se = self._sim_steps and self._reward_stats[-1]['avg_se'],
+            # se = self._sim_steps and self._reward_stats[-1]['avg_se'],
             qos_reward = self._sim_steps and self._reward_stats[-1]['qos_reward'],
             drop_ratio = self._sim_steps and self._reward_stats[-1]['drop_ratio'],
+            ue_drop_ratio = self._sim_steps and self._reward_stats[-1]['ue_drop_ratio'],
         )
         return info
     
     @property
     def full_stats_dir(self):
         return os.path.join(
-            self.stats_dir, self.net.traffic_model.scenario.name, f'SEED{self._seed}')
+            self.stats_dir, self.net.traffic_scenario, f'SEED{self._seed}')
+        # return os.path.join(
+        #     self.stats_dir, self.net.traffic_model.scenario.name, f'SEED{self._seed}')
         
     def close(self):
         if EVAL:

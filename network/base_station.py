@@ -37,13 +37,13 @@ class BaseStation:
     buffer_chunk_size = config.bufferChunkSize
     buffer_num_chunks = config.bufferNumChunks
     urgent_time_lim = 0.02
-    ue_stats_dim = 5
-    all_ue_stats_dim = 4 * ue_stats_dim
+    ue_stats_dim = 3
+    all_ue_stats_dim = 2 * ue_stats_dim
     hist_stats_dim = buffer_num_chunks * buffer_shape[1]
     mutual_obs_dim = 1 + ue_stats_dim
     
     public_obs_space = make_box_env(
-        [[0, np.inf], [0, max_antennas], [0, 1]] +
+        [[0, np.inf], [0, max_antennas]] +
         [[0, 1]] * num_sleep_modes
     )
     private_obs_space = make_box_env(
@@ -59,6 +59,7 @@ class BaseStation:
         self_obs_space, duplicate_box_env(
             other_obs_space, 8))
     # total_obs_space = self_obs_space
+    # total_obs_space = private_obs_space
     
     public_obs_dim = box_env_ndims(public_obs_space)
     private_obs_dim = box_env_ndims(private_obs_space)
@@ -69,7 +70,7 @@ class BaseStation:
     action_dims = (num_ant_switch_opts, num_sleep_modes)
     # action_dims = (num_ant_switch_opts, num_sleep_modes, num_conn_modes)
     # action_dims = (num_ant_switch_opts, num_sleep_modes, cluster_size_opts)
-    # action_dims = (num_sleep_modes,)
+    # action_dims = (num_ant_switch_opts,)
 
     def __init__(
         self, id, pos, net, 
@@ -438,7 +439,7 @@ class BaseStation:
     def alloc_power(self):
         if not self.ues: return
         if len(self.ues) > 1:
-            alpha = 0
+            alpha = 1
             beta = 1
             gamma = np.array([ue._gamma[self.id] for ue in self.ues.values()])
             r = np.array([ue.required_rate for ue in self.ues.values()]) / 1e7
@@ -647,11 +648,8 @@ class BaseStation:
         #     P_proc0 = 0
         #     P_st *= sleep_deltas[S]
 
-        
-            
         P_proc   = P_proc0 + proc_slope * (C_AP / C_AP_max)
 
-        
         P_total = P_st + P_tr + P_proc
 
         P_total *= sleep_deltas[S]
@@ -718,8 +716,13 @@ class BaseStation:
         n_drop = self._ue_stats[1,0]
         q_drop = self.drop_ratio
         n = n_done + n_drop + 1e-6
-        r_qos = (-n_drop * q_drop + w_xqos * n_done * (1 - q_del)) / n
+        # r_qos = (-n_drop * q_drop + w_xqos * n_done * (1 - q_del)) / n
+        r_qos = - q_drop
         reward = w_qos * r_qos - pc_kw * w_pc
+        # print(f'{self.net.world_time_repr}  n_drop: {n_drop}  n_done: {n_done} qos: {r_qos:.5f}  pc: {pc_kw:.5f}  reward: {reward:.5f}')
+        # if n_drop > 0:
+        #     print(q_drop)
+        #     sys.exit()
         return reward
         
     # @timeit
@@ -762,7 +765,7 @@ class BaseStation:
             ### public information ###
             # [self.band_width, self.transmit_power],
             # [self.net.cluster_size],
-            [self.operation_pc, self.num_ant, self.responding],
+            [self.operation_pc, self.num_ant],
             onehot_vec(self.num_sleep_modes, self.sleep),
             ### private information ###
             onehot_vec(self.num_sleep_modes, self._next_sleep),
@@ -800,27 +803,30 @@ class BaseStation:
     def get_all_ue_stats(self):
         serving_ues = []
         queued_ues = []
-        idle_ues = []
+        # idle_ues = []
         for ue in self.covered_ues:             
             if ue in self.ues.values():
-                if ue.active:
-                    serving_ues.append(ue)
+                serving_ues.append(ue)
             elif ue in self.queue:
                 queued_ues.append(ue)
-            else:
-                idle_ues.append(ue)
+            # else:
+            #     idle_ues.append(ue)
+        # return np.array([self.get_ue_stats(ues) for ues in
+        #                  [self.covered_ues, serving_ues, queued_ues]],
+        #                 dtype=np.float32)
         return np.array([self.get_ue_stats(ues) for ues in
-                         [self.covered_ues, serving_ues, queued_ues, idle_ues]],
-                        dtype=np.float32)
+                         [serving_ues, queued_ues]], dtype=np.float32)
 
     def get_ue_stats(self, ues):
         if not ues:
             return np.zeros(self.ue_stats_dim, dtype=np.float32)
-        stats = np.array([
-            [ue.data_rate, ue.required_rate, ue.tx_power, ue.time_limit]
-            for ue in ues]).T
-        return [len(ues), stats[0].sum() / 1e6, stats[1].sum() / 1e6,
-                stats[2].sum(), np.sum(stats[3] <= self.urgent_time_lim)]
+        # stats = np.array([
+        #     [ue.data_rate, ue.required_rate, ue.tx_power, ue.time_limit]
+        #     for ue in ues]).T
+        # return [len(ues), stats[0].sum() / 1e6, stats[1].sum() / 1e6,
+        #         stats[2].sum(), np.sum(stats[3] <= self.urgent_time_lim)]
+        stats = np.array([[ue.data_rate, ue.required_rate] for ue in ues]).T
+        return [len(ues), stats[0].sum() / 1e6, stats[1].sum() / 1e6]
 
     def update_timer(self, dt):
         self._steps += 1

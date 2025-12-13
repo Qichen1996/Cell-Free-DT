@@ -1,5 +1,4 @@
 import numpy as np
-from gym.spaces import MultiDiscrete
 from network.base_station import BaseStation as BS
 from env.config import timeStep, actionInterval
 

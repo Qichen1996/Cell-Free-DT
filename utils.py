@@ -16,6 +16,7 @@ import threading
 import itertools
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from typing import *
 from config import DEBUG
 from pathlib import Path
@@ -152,6 +153,58 @@ if not DEBUG:
 else:
     atexit.register(Profile.print_debug_exit)
 
+def plot_and_save_saliency(saliency_list, save_dir="saliency_figs"):
+    os.makedirs(save_dir, exist_ok=True)
+    saliency_array = np.stack(saliency_list)  # (T, state_dim)
+    mean_saliency = saliency_array.mean(axis=0)
+
+    # ===== 状态名称 =====
+    state_labels = ["pc", "ant", "sm0", "sm1", "sm2", "sm3", "wk_up", "arr_rate", "ue", "thru", "req", "que", "qthru", "qreq"]
+    state_dim = len(state_labels)
+
+    # 如果状态维度比标签多（比如有额外特征），自动补充
+    if saliency_array.shape[1] > state_dim:
+        state_labels += [f"state_{i}" for i in range(state_dim, saliency_array.shape[1])]
+    elif saliency_array.shape[1] < state_dim:
+        state_labels = state_labels[:saliency_array.shape[1]]
+
+    # ===== 1️⃣ 平均重要性条形图 =====
+    plt.figure(figsize=(8, 5))
+    plt.bar(np.arange(len(mean_saliency)), mean_saliency, tick_label=state_labels)
+    plt.title("Mean State Importance Over Trajectory")
+    plt.xlabel("State Dimension")
+    plt.ylabel("Average |Gradient|")
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, "mean_importance.png"), dpi=200)
+    plt.close()
+
+    # ===== 2️⃣ 热力图：时间 vs 状态 =====
+    plt.figure(figsize=(8, 5))
+    plt.imshow(saliency_array.T, aspect='auto', cmap='hot', interpolation='nearest')
+    plt.colorbar(label='|Gradient| Importance')
+    plt.title("State Importance Over Time")
+    plt.xlabel("Time Step")
+    plt.ylabel("State Dimension")
+    plt.yticks(np.arange(len(state_labels)), state_labels)
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, "saliency_heatmap.png"), dpi=200)
+    plt.close()
+
+    # ===== 3️⃣ 最重要维度的时间曲线 =====
+    important_dims = np.argsort(-mean_saliency)[:5]
+    plt.figure(figsize=(8, 5))
+    for dim in important_dims:
+        label = state_labels[dim] if dim < len(state_labels) else f"state[{dim}]"
+        plt.plot(saliency_array[:, dim], label=label)
+    plt.legend()
+    plt.title("Saliency of Top State Dimensions Over Time")
+    plt.xlabel("Time Step")
+    plt.ylabel("|Gradient|")
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_dir, "top_dims_curves.png"), dpi=200)
+    plt.close()
+
+    print(f"✅ Saliency plots saved in: {save_dir}")
 
 class trace_locals:
     def __init__(self, func):

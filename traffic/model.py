@@ -19,7 +19,7 @@ class TrafficType(enum.IntEnum):
     A = 1
     B = 2
     C = 3
-    # D = 4
+    D = 4
     # E = 5
 
 class TrafficModel:
@@ -47,6 +47,7 @@ class TrafficModel:
 
     @classmethod
     def from_scenario(cls, scenario='RANDOM', **kwargs):
+        scenario = "B"
         if type(scenario) is str:
             s = scenario.upper()
             if s == 'RANDOM':
@@ -101,6 +102,15 @@ class TrafficModel:
         Returns:
         A list of length n_apps, each element is either (traffic-demand, delay-budget) or False.
         """
+        # arrivals = []
+        # for lam, delay in zip(self.get_arrival_rates(time, dt), self.delay_budgets):
+        #     n = self._rng.poisson(lam)
+        #     if n > 0:
+        #         arrivals.append((n * self.file_size, n * delay))
+        #         # arrivals.append((self.file_size, delay) * n)
+        #     else:
+        #         arrivals.append((None, None))
+        # return arrivals
         return [(self.file_size, delay) if self._rng.random() < p else (None, None)
                 for p, delay in zip(self.get_arrival_rates(time, dt), self.delay_budgets)]
 

@@ -76,8 +76,9 @@ def get_config():
         description='onpolicy', formatter_class=argparse.RawDescriptionHelpFormatter)
 
     # prepare parameters
-    parser.add_argument("-A", "--algorithm_name", type=str,
-                        default='mappo', choices=["rmappo", "mappo", "dqn", "fixed", "simple1", "simple"])
+    parser.add_argument("-A", "--algorithm_name", type=str, default='mappo'
+                        # , choices=["rmappo", "mappo", "dqn", "dt", "fixed", "simple1", "simple"]
+                       )
     parser.add_argument("-G", "--group_name", type=str,
                         help="the group name of the training (we use traffic scenario)")
     parser.add_argument("-L", '--log_level', type=str, default='DEBUG' if DEBUG else 'NOTICE',
@@ -181,7 +182,7 @@ def get_config():
                         default=False, help='use a linear schedule on the learning rate')
 
     # env parameters
-    parser.add_argument("--env_name", type=str, default='CellFreeNetwork', help="specify the name of environment")
+    parser.add_argument("--env_name", type=str, default='DT', help="specify the name of environment")
     parser.add_argument("--use_obs_instead_of_state", action='store_true',
                         default=False, help="Whether to use global state or concatenated obs")
 
@@ -228,7 +229,7 @@ def get_env_config():
                         help="number of steps per episode")
     parser.add_argument("-T0", "--start_time", type=str,
                         help="start time of the simulation")
-    parser.add_argument("-a", "--accelerate", type=int,
+    parser.add_argument("-a", "--accelerate", type=int, default=1200,
                         help="acceleration rate of the simulation")
     parser.add_argument("--area_size", type=float,
                         help="width of the square area in meters")

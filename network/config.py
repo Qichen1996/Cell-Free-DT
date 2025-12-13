@@ -4,7 +4,7 @@ from utils import dB2lin, lin2dB
 renderMode = 'none'
 
 # base station params
-numBS = 25
+numBS = 4
 interBSDist = 200  # the distance between two adjacent BSs
 # cellRadius = 750  # the radius of a hexagon cell in meters
 txPower = 0.25  # average transmit power per antenna in watts
@@ -25,14 +25,14 @@ clusterSizeOpts = [-1, 0, 1]
 # sleepModeDeltas = [1, 0.69, 0.50, 0.29]
 sleepModeDeltas = [1, 0.675, 0.55, 0.23]
 # sleepModeDeltas = [1, 0.69, 0.50]
-# wakeupDelays = [0, 1e-3, 1e-2, 1e-1]
-wakeupDelays = [0, 37e-6, 5e-4, 5e-3]
+wakeupDelays = [0, 1e-3, 1e-2, 1e-1]
+# wakeupDelays = [0, 37e-6, 5e-4, 5e-3]
 # wakeupDelays = [0, 1e-3, 1e-2]
 antSwitchEnergy = 0  # energy consumption of switch per antenna in Joules
 sleepSwitchEnergy = [0, 0, 0, 0]  # energy consumption of switching sleep mode in Joules
 disconnectEnergy = 0.01  # energy consumption of a disconnection (before UE is done) in Joules
-bufferShape = (50, 1)  # shape of the buffer used to record past observations
-bufferChunkSize = 50  # chunk size to apply average pooling
+bufferShape = (5, 1)  # shape of the buffer used to record past observations
+bufferChunkSize = 5  # chunk size to apply average pooling
 bufferNumChunks = bufferShape[0] // bufferChunkSize
 
 
@@ -51,8 +51,8 @@ def square_grid_centers(rows=5, cols=5, area_w=1000.0, area_h=1000.0):
     centers = np.array([(x, y) for y in ys for x in xs])
     return centers
 
-bsPositions = square_grid_centers(5, 5, 1000.0, 1000.0)
-areaSize = np.array([1000.0, 1000.0])
+bsPositions = square_grid_centers(2, 2, 400.0, 400.0)
+areaSize = np.array([400.0, 400.0])
 
 # def calculate_hex_centers(rows, cols, size=1):
 #     """Calculate hexagonal grid centers."""
@@ -89,16 +89,23 @@ areaSize = np.array([1000.0, 1000.0])
 probeGridSize = 20
 
 # obs names
-public_obs_keys = ['pc', 'num_antennas', 'responding', 'sleep_mode']
+# public_obs_keys = ['pc', 'num_antennas', 'sleep_mode']
 hist_stats_keys = ['arrival_rate']
-ue_groups = ['covered', 'serving', 'queued', 'idle']
-ue_stats_keys = ['num', 'sum_rate', 'sum_rate_req', 'sum_tx_power', 'num_urgent']
-private_obs_keys = ['next_sleep_mode', 'wakeup_time',
+# ue_groups = ['covered', 'serving', 'queued']
+# ue_stats_keys = ['num', 'sum_rate', 'sum_rate_req', 'sum_tx_power', 'num_urgent']
+# private_obs_keys = ['next_sleep_mode', 'wakeup_time',
+#                     *[f'{k}{i}' for i in range(-bufferNumChunks, 0) for k in hist_stats_keys],
+#                     *[f'{u}_{k}' for u in ue_groups for k in ue_stats_keys]]
+public_obs_keys = ['pc', 'num_antennas', 'sleep_mode']
+ue_groups = ['serving', 'queued']
+ue_stats_keys = ['num', 'sum_rate', 'sum_rate_req']
+private_obs_keys = ['next_sleep_mode', 'wakeup_time', 
                     *[f'{k}{i}' for i in range(-bufferNumChunks, 0) for k in hist_stats_keys],
                     *[f'{u}_{k}' for u in ue_groups for k in ue_stats_keys]]
 mutual_obs_keys = ['dist', *ue_stats_keys]
 other_obs_keys = [f'nb{i}_{k}' for i in range(8) for k in public_obs_keys + mutual_obs_keys]
 all_obs_keys = public_obs_keys + private_obs_keys + other_obs_keys
+# all_obs_keys = public_obs_keys + private_obs_keys
 
 # pc model new
 fs            = 30.72e6   # Hz，采样率

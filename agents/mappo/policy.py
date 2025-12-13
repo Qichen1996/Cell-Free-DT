@@ -102,8 +102,7 @@ class MappoPolicy(Policy):
         torch.save(self.critic.state_dict(), osp.join(save_dir, "critic%s.pt" % version))
 
     def load(self, model_dir, version=''):
-        actor_file = next(model_dir.glob(f'actor*{version}.pt'))
-        # actor_file = osp.join(model_dir, f'actor_eps70.pt')
+        actor_file = osp.join(model_dir, f'actor{version}.pt')
         notice("Loading actor network from {}".format(actor_file))
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.actor.load_state_dict(torch.load(str(actor_file), map_location=device))
@@ -145,7 +144,7 @@ class MappoPolicy(Policy):
                 actor_rnn_state = self._actor_rnn_state
         if masks is None:
             masks = np.ones((1, 1), dtype=np.float32)
-        actions, _, actor_rnn_state = self.actor(
+        actions, action_log_probs, actor_rnn_state = self.actor(
             obs, actor_rnn_state, masks, available_actions, deterministic)
         self._actor_rnn_state = actor_rnn_state
         return actions.cpu().numpy()
