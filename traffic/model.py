@@ -19,7 +19,7 @@ class TrafficType(enum.IntEnum):
     A = 1
     B = 2
     C = 3
-    D = 4
+    # D = 4
     # E = 5
 
 class TrafficModel:
@@ -47,6 +47,7 @@ class TrafficModel:
 
     @classmethod
     def from_scenario(cls, scenario='RANDOM', **kwargs):
+        level = TrafficType[s]
         scenario = "B"
         if type(scenario) is str:
             s = scenario.upper()
@@ -57,18 +58,20 @@ class TrafficModel:
             scenario = TrafficType(scenario)
         profiles_df = pd.read_csv(cls.profiles_path, index_col=[0, 1, 2])
         profile = profiles_df.loc[int(scenario)]
-        return cls(scenario=scenario, **kwargs).fit(profile)
+        return cls(scenario=scenario, **kwargs).fit(profile, level)
     
     @classmethod
     def seed(cls, seed):
         cls._rng = np.random.default_rng(seed)
         
-    def fit(self, data_rate_df, smoothen=True):
+    def fit(self, data_rate_df, level, smoothen=True):
         """ Fit the traffic model to the given traffic trace dataset. """
         assert data_rate_df.shape[1] == self.num_apps
         df = data_rate_df[self.app_names] / self.sample_rate
         self.interval, rem = divmod(self.period, len(df))
         assert rem == 0, (self.interval, rem)
+        df = df.mean() * level * 2 + df
+        print(level)
         
         self.rates = df * self.area / self.file_size  # files / s
         assert self.rates.values.max() * 1e-3 <= 1.

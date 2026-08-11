@@ -439,7 +439,7 @@ class BaseStation:
     def alloc_power(self):
         if not self.ues: return
         if len(self.ues) > 1:
-            alpha = 1
+            alpha = 0
             beta = 1
             gamma = np.array([ue._gamma[self.id] for ue in self.ues.values()])
             r = np.array([ue.required_rate for ue in self.ues.values()]) / 1e7
