@@ -4,7 +4,7 @@ from utils import dB2lin, lin2dB
 renderMode = 'none'
 
 # base station params
-numBS = 4
+numBS = 16
 interBSDist = 200  # the distance between two adjacent BSs
 # cellRadius = 750  # the radius of a hexagon cell in meters
 txPower = 0.25  # average transmit power per antenna in watts
@@ -25,8 +25,8 @@ clusterSizeOpts = [-1, 0, 1]
 # sleepModeDeltas = [1, 0.69, 0.50, 0.29]
 sleepModeDeltas = [1, 0.675, 0.55, 0.23]
 # sleepModeDeltas = [1, 0.69, 0.50]
-wakeupDelays = [0, 1e-3, 1e-2, 1e-1]
-# wakeupDelays = [0, 37e-6, 5e-4, 5e-3]
+# wakeupDelays = [0, 1e-3, 1e-2, 1e-1]
+wakeupDelays = [0, 37e-6, 5e-4, 5e-3]
 # wakeupDelays = [0, 1e-3, 1e-2]
 antSwitchEnergy = 0  # energy consumption of switch per antenna in Joules
 sleepSwitchEnergy = [0, 0, 0, 0]  # energy consumption of switching sleep mode in Joules
@@ -51,8 +51,8 @@ def square_grid_centers(rows=5, cols=5, area_w=1000.0, area_h=1000.0):
     centers = np.array([(x, y) for y in ys for x in xs])
     return centers
 
-bsPositions = square_grid_centers(2, 2, 400.0, 400.0)
-areaSize = np.array([400.0, 400.0])
+bsPositions = square_grid_centers(4, 4, 800.0, 800.0)
+areaSize = np.array([800.0, 800.0])
 
 # def calculate_hex_centers(rows, cols, size=1):
 #     """Calculate hexagonal grid centers."""

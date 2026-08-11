@@ -47,7 +47,7 @@ class TrafficModel:
 
     @classmethod
     def from_scenario(cls, scenario='RANDOM', **kwargs):
-        level = TrafficType[s]
+        level = TrafficType[scenario]
         scenario = "B"
         if type(scenario) is str:
             s = scenario.upper()
@@ -71,7 +71,6 @@ class TrafficModel:
         self.interval, rem = divmod(self.period, len(df))
         assert rem == 0, (self.interval, rem)
         df = df.mean() * level * 2 + df
-        print(level)
         
         self.rates = df * self.area / self.file_size  # files / s
         assert self.rates.values.max() * 1e-3 <= 1.
