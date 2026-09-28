@@ -456,6 +456,7 @@ class MappoTrainer(BaseTrainer):
         for episode in pbar:
             if self.use_linear_lr_decay:
                 self.policy.lr_decay(episode, episodes)
+            # self.lr_decay(episode, episodes)
 
             for step in trange(self.episode_length, file=sys.stdout, postfix='collecting'):
                 # sample actions
@@ -477,8 +478,8 @@ class MappoTrainer(BaseTrainer):
                 #     self.log_train(train_info, steps)
                 # steps += self.n_rollout_threads
             
-                if np.all(done):
-                    break
+                # if np.all(done):
+                #     break
 
             # compute return and update network
             self.compute()
@@ -505,16 +506,16 @@ class MappoTrainer(BaseTrainer):
                     sm1_ratio_mean = np.mean([d['sm1_ratio'] for d in infos]),
                     **rew_info)
                 avg_step_rew = np.mean(self.buffer.rewards)
-                avg_drop_ratio = np.mean([
-                    step["drop_ratio"]
-                    for info in infos
-                    for step in info["step_rewards"]
-                ])
-                avg_pc = np.mean([
-                    step["pc_kw"]
-                    for info in infos
-                    for step in info["step_rewards"]
-                ])
+                # avg_drop_ratio = np.mean([
+                #     step["drop_ratio"]
+                #     for info in infos
+                #     for step in info["step_rewards"]
+                # ])
+                # avg_pc = np.mean([
+                #     step["pc_kw"]
+                #     for info in infos
+                #     for step in info["step_rewards"]
+                # ])
                 # print(f'dp: {avg_drop_ratio}')
                 # print(f'pc: {avg_pc}')
                 # assert abs(avg_step_rew - train_infos['reward_mean']) < 1e-3

@@ -2,8 +2,7 @@ from utils import *
 from config import *
 from . import config
 from .channel import compute_channel_gain
-import traceback
-
+from traffic.config import packetsPerUE
 
 class UEStatus(enum.IntEnum):
     IDLE = 0
@@ -29,7 +28,14 @@ class UserEquipment:
         self.net = None
         self.service = service
         self.status = UEStatus.IDLE
-        self.demand = self.total_demand = demand
+        self.total_demand = demand  # full session commitment
+        self.packet_size = demand / packetsPerUE
+        self.demand = self.packet_size  # current packet only
+        self.packets_remaining = packetsPerUE  # includes current packet
+        self.completed_packets = 0
+        self.dropped_packets = 0
+        self.dropped_bits = 0.
+        self.packet_delay_sum = 0.
         self.delay_budget = delay_budget
         self.delay = 0.
         self.t_served = 0.
@@ -41,6 +47,8 @@ class UserEquipment:
         self._cover_bss = set()
         self.cluster_size = 0
         self._sinr_stats = Counter()
+        self.connection_requested = False
+        self.prelog_factor = (self.tau_c - self.tau_p) / self.tau_c
 
     # define boolean properties for each UE status
     for status in UEStatus._member_names_:
@@ -89,7 +97,7 @@ class UserEquipment:
         for i in self._sorted_bss:
             cumulative_gain += self._gains[i]
             self._cover_bss.add(self.net.get_bs(i))
-            if cumulative_gain >= 0.95 * total_gain:
+            if cumulative_gain >= 0.9 * total_gain:
                 break
         self.cluster_size = len(self._cover_bss)
         for b in self._cover_bss:
@@ -148,20 +156,16 @@ class UserEquipment:
     def time_limit(self):
         return self.delay_budget - self.delay
     
-    @cached_property
+    @property
     def required_rate(self):
         t_lim = self.time_limit
         if t_lim <= 0: return 0.
         return self.demand / t_lim
     
-    @cached_property
+    @property
     def throughput_ratio(self):
         if self.required_rate <= 0: return 1.
         return min(self.data_rate / self.required_rate, 10.)
-    
-    @property
-    def urgent(self):
-        return self.time_limit < 0.03
 
     def compute_sinr(self, N=config.noiseSpectralDensity):
         if not self.bss: return 0
@@ -182,7 +186,7 @@ class UserEquipment:
     @property
     def SE(self):
         sinr = self.compute_sinr()
-        return (self.tau_p - self.tau_c) / self.tau_p * np.log2(1 + sinr)
+        return (self.tau_c - self.tau_p) / self.tau_c * np.log2(1 + sinr)
 
     @timeit
     def compute_data_rate(self):
@@ -192,7 +196,7 @@ class UserEquipment:
         """
         sinr = self.compute_sinr()
         if sinr == 0: return 0
-        return self.bss[0].bandwidth * np.log2(1 + sinr)
+        return self.prelog_factor * self.bss[0].bandwidth * np.log2(1 + sinr)
 
     def update_data_rate(self):
         self._thruput = None
@@ -227,7 +231,7 @@ class UserEquipment:
     #         info(f'UE {self.id}: removed from queue of BS {bs.id}')
 
     def request_connection(self):
-        assert len(self.bss) < self.cluster_size
+        self.connection_requested = True
         for b in self._cover_bss:
             if b not in self.bss:
                 res = b.respond_connection_request(self)
@@ -269,29 +273,53 @@ class UserEquipment:
                     b.pop_from_queue(self)
         self.update_data_rate()
 
+    @property
+    def future_packets(self):
+        return max(0, self.packets_remaining - 1)
+
+    def finish_packet(self, success):
+        """Record immediately, keeping the UE association until the final packet."""
+        result = 0 if success else 1
+        for owner in (self.net, *self._cover_bss):
+            owner._packet_stats[self.service, result] += 1
+            owner._packet_totals[self.service, result] += 1
+        self.packet_delay_sum += self.delay
+        if success:
+            self.completed_packets += 1
+        else:
+            self.dropped_packets += 1
+            self.dropped_bits += self.demand
+        self.packets_remaining -= 1
+        self.__class__._cache.pop(self.id, None)
+        if not self.packets_remaining:
+            self.quit()
+        else:
+            self.demand = self.packet_size
+            self.delay = 0.
+
     def quit(self):
         self.disconnect()
-        if self.demand > 0.:
-            for b in self._cover_bss:  
-                b._ue_stats[1] += [1, self.demand / self.total_demand]
-                # b._ue_stats[0] += [1, self.delay / self.delay_budget]
+        service = self.service
+        if self.dropped_packets:
+            remaining_ratio = self.dropped_bits / self.total_demand
+            for b in self._cover_bss:
+                b._ue_stats[service, 1] += [1, remaining_ratio]
         else:
             for b in self._cover_bss:
-                b._ue_stats[0] += [1, self.delay / self.delay_budget]
-                # b._ue_stats[1] += [1, self.demand / self.total_demand]
+                b._ue_stats[service, 0] += [1, self.packet_delay_sum / (packetsPerUE * self.delay_budget)]
         for b in list(self._cover_bss):
             b.remove_from_cell(self)
             self._cover_bss.remove(b)
-        if self.demand <= 0.:
+        if not self.dropped_packets:
             self.demand = 0.
             self.status = UEStatus.DONE
         else:
             self.status = UEStatus.DROPPED
         # self.served = self.total_demand - self.demand
         if EVAL:
-            dropped = self.demand
+            dropped = self.dropped_bits
             done = self.total_demand - dropped
-            delay = self.delay
+            delay = self.packet_delay_sum / (self.completed_packets + self.dropped_packets)
             service_time = self.t_served
             steps = self._sinr_stats.pop('T', 1)
             self.net.add_stat('ue_stats', dict(
@@ -301,22 +329,29 @@ class UserEquipment:
                 delay = delay,
                 delay_budget = self.delay_budget,
                 service_time = service_time,
+                completed_packets = self.completed_packets,
+                dropped_packets = self.dropped_packets,
                 # **{'avg_'+k: self._sinr_stats[k]/steps
                 #    for k in list(self._sinr_stats)}
             ))
         self.net.remove_user(self.id)
-        del self.__class__._cache[self.id]
+        self.__class__._cache.pop(self.id, None)
     
     def step(self, dt):
-        # DEBUG and debug(f'<< {self}')
+        # Resolve at most one packet per step; discard excess capacity.
+        if not self.packets_remaining:
+            return
+        rate = max(0., self.data_rate) if self.active else 0.
+        self.demand = max(0., self.demand - rate * dt)
         self.delay += dt
-        if EVAL and self.active:
-            self.t_served += dt
         if self.active:
-            self.demand -= self.data_rate * dt
-        if self.demand <= 0 or self.delay >= self.delay_budget:
-            self.quit()
-        # DEBUG and debug(f'>> {self}')
+            self.t_served += dt
+        # Boundary-only checks: completion takes precedence. A new packet is
+        # prepared at this boundary but first served in the following step.
+        if self.demand <= 0:
+            self.finish_packet(True)
+        elif self.delay >= self.delay_budget:
+            self.finish_packet(False)
 
     @timeit
     def info_dict(self):
@@ -330,7 +365,7 @@ class UserEquipment:
             demand=self.demand / 1e3,   # in kb
             rate=self.compute_data_rate() / 1e6,  # in mb/s
             ddl=self.time_limit * 1e3,  # in ms
-            urgent=self.urgent
+            future_packets=self.future_packets,
         )
     
     def __repr__(self):

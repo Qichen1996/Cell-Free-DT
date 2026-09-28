@@ -9,7 +9,6 @@ class MaskedCausalAttention(nn.Module):
         super().__init__()
 
         self.n_heads = n_heads
-        self.max_T = max_T
 
         self.q_net = nn.Linear(h_dim, h_dim)
         self.k_net = nn.Linear(h_dim, h_dim)
@@ -17,17 +16,13 @@ class MaskedCausalAttention(nn.Module):
 
         self.proj_net = nn.Linear(h_dim, h_dim)
 
-        self.att_drop = nn.Dropout(drop_p)
+        self.drop_p = drop_p
         self.proj_drop = nn.Dropout(drop_p)
 
-        ones = torch.ones((max_T, max_T))
-        mask = torch.tril(ones).view(1, 1, max_T, max_T)
-
-        self.last_attention = None
-
-        # register buffer makes sure mask does not get updated
-        # during backpropagation
-        self.register_buffer('mask',mask)
+    def _load_from_state_dict(self, state_dict, prefix, *args, **kwargs):
+        # old checkpoints stored an explicit causal mask buffer
+        state_dict.pop(prefix + 'mask', None)
+        super()._load_from_state_dict(state_dict, prefix, *args, **kwargs)
 
     def forward(self, x):
         B, T, C = x.shape # batch size, seq length, h_dim * n_heads
@@ -39,17 +34,9 @@ class MaskedCausalAttention(nn.Module):
         k = self.k_net(x).view(B, T, N, D).transpose(1,2)
         v = self.v_net(x).view(B, T, N, D).transpose(1,2)
 
-        # weights (B, N, T, T)
-        weights = q @ k.transpose(2,3) / math.sqrt(D)
-        # causal mask applied to weights
-        weights = weights.masked_fill(self.mask[...,:T,:T] == 0, float('-inf'))
-        # normalize weights, all -inf -> 0 after softmax
-        normalized_weights = F.softmax(weights, dim=-1)
-
-        self.last_attention = normalized_weights.detach().cpu()  # save
-
-        # attention (B, N, T, D)
-        attention = self.att_drop(normalized_weights @ v)
+        # causal scaled dot-product attention (B, N, T, D)
+        attention = F.scaled_dot_product_attention(
+            q, k, v, dropout_p=self.drop_p if self.training else 0.0, is_causal=True)
 
         # gather heads and project (B, N, T, D) -> (B, T, N*D)
         attention = attention.transpose(1, 2).contiguous().view(B,T,N*D)
@@ -90,12 +77,13 @@ class DecisionTransformer(nn.Module):
         self.h_dim = h_dim
 
         ### transformer blocks
-        input_seq_len = 3 * context_len
+        input_seq_len = 1 + 3 * context_len
         blocks = [Block(h_dim, input_seq_len, n_heads, drop_p) for _ in range(n_blocks)]
         self.transformer = nn.Sequential(*blocks)
 
         ### projection heads (project to embedding)
         self.embed_ln = nn.LayerNorm(h_dim)
+        self.embed_prompt = nn.Embedding(3, h_dim)
         self.embed_timestep = nn.Embedding(max_timestep, h_dim)
         self.embed_rtg = torch.nn.Linear(1, h_dim)
         self.embed_state = torch.nn.Linear(state_dim, h_dim)
@@ -125,7 +113,7 @@ class DecisionTransformer(nn.Module):
         )
 
 
-    def forward(self, timesteps, states, actions, returns_to_go):
+    def forward(self, timesteps, states, actions, returns_to_go, prompts):
 
         B, T, _ = states.shape
 
@@ -136,8 +124,7 @@ class DecisionTransformer(nn.Module):
 
         a1 = actions[..., 0].long()
         a2 = actions[..., 1].long()
-        a3 = actions[..., 2].long()
-        action_embeddings = self.embed_action_1(a1) + self.embed_action_2(a2) + self.embed_action_2(a3)
+        action_embeddings = self.embed_action_1(a1) + self.embed_action_2(a2)
         action_embeddings += time_embeddings
         # action_embeddings = self.embed_action_1(a1) + time_embeddings
         
@@ -151,10 +138,18 @@ class DecisionTransformer(nn.Module):
         # h = torch.stack(
         #     (state_embeddings, action_embeddings), dim=1
         # ).permute(0, 2, 1, 3).reshape(B, 2 * T, self.h_dim)
+
+        # [B, 1, h_dim]
+        prompt_token = self.embed_prompt(prompts.long()).unsqueeze(1)
+        # [B, 1 + 3*T, h_dim]
+        h = torch.cat((prompt_token, h), dim=1)
+
         h = self.embed_ln(h)
 
         # transformer and prediction
         h = self.transformer(h)
+
+        h = h[:, 1:, :]
 
         # get h reshaped such that its size = (B x 3 x T x h_dim) and
         # h[:, 0, t] is conditioned on the input sequence r_0, s_0, a_0 ... r_t
@@ -169,15 +164,5 @@ class DecisionTransformer(nn.Module):
         # get predictions
         logits_1 = self.predict_action_1(h[:,1])
         logits_2 = self.predict_action_2(h[:,1])
-        logits_3 = self.predict_action_3(h[:,1])
-        # logits_1 = self.predict_action_1(h[:,0])
-        # logits_2 = self.predict_action_2(h[:,0])
-        a1 = torch.argmax(logits_1, dim=-1)
-        a2 = torch.argmax(logits_2, dim=-1)
-        a3 = torch.argmax(logits_3, dim=-1)
-        action_preds = torch.stack((a1, a2, a3), dim=-1)
-        # action_preds = a1
 
-        attn_map = self.transformer[-1].attention.last_attention
-
-        return action_preds, [logits_1, logits_2, logits_3], attn_map
+        return [logits_1, logits_2]

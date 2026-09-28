@@ -103,6 +103,7 @@ class MappoPolicy(Policy):
 
     def load(self, model_dir, version=''):
         actor_file = osp.join(model_dir, f'actor{version}.pt')
+        # actor_file = osp.join(model_dir, f'actor_eps200.pt')
         notice("Loading actor network from {}".format(actor_file))
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.actor.load_state_dict(torch.load(str(actor_file), map_location=device))

@@ -13,10 +13,10 @@ from visualize.render import create_dash_app
 # %reload_ext autoreload
 # %autoreload 2
 
-sim_days = 1
+sim_days = 7
 accelerate = 3000
 render_interval = 4
-model_params = dict(w_qos=4, w_pc=0.5, no_interf=False, max_sleep=3, no_offload=False)
+model_params = dict(w_str=600, w_sen=200, w_tol=30, w_pc=10, no_interf=False, max_sleep=3, no_offload=False)
 
 parser = get_config()
 parser.add_argument("--perf_save_path", default="results/performance.csv",
@@ -29,6 +29,9 @@ parser.add_argument("--days", type=int, default=sim_days,
 #                     help="count flops of the model")
 parser.add_argument("--stochastic", action="store_true",
                     help="whether to use stochastic policy")
+parser.add_argument("--model_index", type=int, default=0,
+                    help=("index of the compatible saved run to load after sorting "
+                          "by modification time (0 is the newest; default: 0)"))
 parser.add_argument("--traj_save_path", default="analysis/trajectory",
                     help="path to save trajectory")
 
@@ -47,7 +50,7 @@ parser.add_argument('--device', type=str, default='cuda:0')
 
 env_parser = get_env_config()
     
-parser.set_defaults(log_level='NOTICE', group_name='D')
+parser.set_defaults(log_level='NOTICE', group_name='C')
 env_parser.set_defaults(accelerate=accelerate)
 
 try:
@@ -61,7 +64,8 @@ AGENT = args.algorithm_name
 
 if args.experiment_name == 'test': args.use_wandb = False
 args.num_env_steps = args.days * 24 * 3600 * 50 // env_args.accelerate
-env_args.stats_dir = f'analysis/sim_stats/{AGENT}'
+if env_args.stats_dir is None:
+    env_args.stats_dir = f'analysis/sim_stats/{env_args.scenario}'
 args.max_eval_ep_len = args.num_env_steps
 
 # %%
@@ -93,24 +97,33 @@ def get_model_dir(args, env_args, run_dir, version=''):
     if args.model_dir is not None:
         
         return run_dir / args.model_dir
+    if args.model_index < 0:
+        raise ValueError("--model_index must be non-negative")
     p = 'wandb/run-*%s/files/' if args.use_wandb else '%s/models/'
     dirs = run_dir.glob(p % version)
+    compatible_dirs = []
     for d in sorted(dirs, key=os.path.getmtime, reverse=True):
-        # d = sorted(dirs, key=os.path.getmtime, reverse=True)[0]
-        print(d)
         config_path = d/'config.yaml'
         if not config_path.exists():
             warn("no config file in %s" % d)
-            return d
+            compatible_dirs.append(d)
+            continue
         with open(config_path) as f:
             cfg = yaml.safe_load(f)
-            # for k in model_params:
-            #      if k in cfg:
-            #         print(cfg[k]['value'])
             if all(getattr(env_args, k) == cfg[k]['value']
                     for k in model_params if k in cfg):
-                return d
-    raise FileNotFoundError("no such model directory")
+                compatible_dirs.append(d)
+
+    if not compatible_dirs:
+        raise FileNotFoundError("no compatible model directory")
+    if args.model_index >= len(compatible_dirs):
+        raise IndexError(
+            f"--model_index {args.model_index} is out of range; "
+            f"found {len(compatible_dirs)} compatible run(s)")
+
+    selected_dir = compatible_dirs[args.model_index]
+    print(f"Loading model index {args.model_index}: {selected_dir}")
+    return selected_dir
 
 env = make_env(env_args, seed=args.seed)
 
@@ -190,26 +203,17 @@ env.net.traffic_model.print_info()
 
 set_log_file(args.sim_log_path)
 
+traffic_to_prompt = {
+    "A": 0,
+    "B": 1,
+    "C": 2,
+}
+scenario = env.net.scenario
+
 # %%
 from datetime import datetime
 
 render_mode = args.use_render and ('dash' if args.use_dash else 'frame')
-
-# from hiddenlayer import build_graph
-# build_graph(agent.actor, torch.tensor(obs))
-
-# import wandb
-# import socket
-# wandb.init(
-#             config=args,
-#             project=args.env_name,
-#             entity=args.user_name,
-#             notes=socket.gethostname(),
-#             name=f"{args.algorithm_name}_{args.experiment_name}_seed{args.seed}",
-#             group=env_args.scenario,
-#             job_type="training",
-#             reinit=True,
-#         )
 
 # %%
 def simulate():
@@ -236,7 +240,7 @@ def simulate():
         result_path = os.path.join(result_dir, f"eval_results.csv")
 
         if use_norm:
-            dataset_path = f'{args.dataset_dir}/1.pkl'
+            dataset_path = f'{args.dataset_dir}/c.pkl'
             traj_dataset = TrajectoryDataset(dataset_path, context_len)
             state_mean, state_std = traj_dataset.get_state_stats()
         else:
@@ -263,21 +267,9 @@ def simulate():
         obs_buffer = []
         act_buffer = []
         rew_buffer = []
-        all_saliencies = []
-        
+
         for i in trange(args.num_env_steps, file=sys.stdout):
-            # obs = torch.tensor(obs, dtype=torch.float32, device='cpu', requires_grad=True)
             actions = agent.act(obs, deterministic=not args.stochastic)
-
-            # agent.actor.zero_grad()
-            # if obs.grad is not None:
-            #     obs.grad.zero_()
-
-            # logits[0, 1].backward(retain_graph=True)
-        
-            # saliency = (obs * obs.grad).abs().detach().cpu().numpy().flatten()
-        
-            # all_saliencies.append(saliency[:14])
 
             obs_buffer.append(np.array(obs))
             act_buffer.append(actions)
@@ -286,33 +278,10 @@ def simulate():
                 actions, render_mode=render_mode, render_interval=render_interval)
 
             rew_buffer.append(np.array(rewards))
-            
-            # print(f'bs1 time: {env.net.world_time_repr}  pc: {pc}  ue: {ue}')
-            # train_info = {}
-            # train_info.update(
-            #     # avg_antennas = infos['avg_antennas'],
-            #     # pc = infos['pc'],
-            #     # sm0_cnt = infos['sm0_cnt'],
-            #     b1_pc = C,
-            #     b2_pc = infos['b2_pc'],
-            #     b3_pc = infos['b3_pc'],
-            #     b4_pc = infos['b4_pc'],
-            #     # b1_ant = infos['b1_ant'],
-            #     # b1_sleep = infos['b1_sleep'],
-            #     # b1_ue = infos['b1_ue'],
-            #     # b1_reward = infos['b1_rwd'],
-            #     # sm1_cnt = infos['sm1_cnt'],
-            #     # op_pc = infos['operation_pc'],
-            #     # actual_rate = infos['actual_rate'],
-            #     # interference = infos['interference'],
-            #     )
-            # for k, v in train_info.items():
-            #     wandb.log({k: v}, step=i)
             step_rewards.append(np.mean(rewards))
 
-        # plot_and_save_saliency(all_saliencies)
-        
         trajectory = {
+            "prompt": traffic_to_prompt[scenario],
             'observations': np.array(obs_buffer, dtype=np.float32),   # (T, 123)
             'actions': np.array(act_buffer, dtype=np.float32),        # (T, 2)
             'rewards': np.array(rew_buffer, dtype=np.float32),        # (T, 1)
@@ -321,7 +290,7 @@ def simulate():
         # if args.seed == 1:
         save_dir = args.traj_save_path
         os.makedirs(args.traj_save_path, exist_ok=True)
-        save_path = os.path.join(save_dir, f"4ap.pkl")
+        save_path = os.path.join(save_dir, f"c.pkl")
     
         if os.path.exists(save_path):
             with open(save_path, 'rb') as f:
@@ -330,9 +299,9 @@ def simulate():
             data = []
         
         data.append(trajectory)
-        with open(save_path, 'wb') as f:
-            pickle.dump(data, f)
-        print(f"Trajectory saved to: {save_path}")
+        # with open(save_path, 'wb') as f:
+        #     pickle.dump(data, f)
+        # print(f"Trajectory saved to: {save_path}")
     
         rewards = pd.Series(np.squeeze(step_rewards), name='reward')
     
@@ -357,7 +326,7 @@ def simulate():
             return env.animate()
 
 simulate()
-# env.close()
+env.close()
 
 # %%
 if args.use_dash:

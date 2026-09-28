@@ -7,7 +7,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.io as pio
+from pathlib import Path
 import os
+import warnings
+
+warnings.filterwarnings("ignore")
 
 plotly_template = pio.templates['plotly']
 plotly_template['layout'].update(
@@ -28,7 +32,7 @@ files = glob.glob(f'sim_stats/*/{scenario}/*/trajectory.csv')
 df = [pd.read_csv(f, index_col=0) for f in files]
 for f in df:
     f.index = f.index.str.replace(',', '')
-agents = [tuple(f.split('/')[1:4]) for f in files]
+agents = [tuple(Path(f).parts[-4:-1]) for f in files]
 df = pd.concat(df, keys=agents, names=['policy', 'scenario', 'seed'])
 # df = df.sort_index(level=0, ascending=False)[~df.index.duplicated(keep='last')]
 df0 = df = df.reset_index(level=-1).groupby(['policy', 'scenario', 'time'], sort=False).mean()
@@ -61,7 +65,7 @@ def refactor(df):
     elif group == 'pc':
         df = df.rename({'fixed_gamma': 'All-gamma', 'simple1_gamma': 'Auto-gamma', 'fixed_ab': 'All-both', 'simple1_ab': 'Auto-both', 'fixed_rate': 'All-rate', 'simple1_rate': 'Auto-rate', 'mappo_w_qos=40.0_w_pc=0.8': 'ppo'})
     elif group == 'dt':
-        df = df.rename({'fixed': 'Always-on', 'dt': 'DT', 'mappo': 'MAPPO', 'simple1': 'Auto-SM1'})
+        df = df.rename({'fixed': 'Always-on', 'dt': 'DT', 'mappo': 'MAPPO', 'simple1': 'Auto-SM1', 'A': 'A', 'B': 'B', 'C_w_str=400.0_w_sen=5.0_w_tol=0.0_w_pc=0.1': 'C', 'mid': 'medium', 'high': 'high'})
     elif group == 'w':
         df = df.rename({'mappo_w_qos=40.0': 'STEP11_SM0,3'})
     elif group == 'antenna':
@@ -107,7 +111,7 @@ elif group == 'pc':
     policies = ['All-both', 'All-gamma', 'Auto-both', 'Auto-gamma', 'ppo']
 elif group == 'dt':
     policies = 'Always-on Auto-SM1 MAPPO DT'.split()
-    policies = 'Always-on MAPPO'.split()
+    policies = 'A'.split()
 elif group == 'antenna':
     policies = ['All-on','Fixed','MAPPO']
 elif group == 'wqos':
@@ -121,18 +125,19 @@ elif group == 'sm':
 else:
     raise ValueError
 
-win_sz = len(df0.sort_index().loc[(df0.index[0][0], 'B')]) // 168
+first_group = next(iter(df0.groupby(level=['policy', 'scenario'], sort=False)))[1]
+win_sz = max(1, len(first_group) // 168)
 df = refactor(df0)
 
 # %%
 name_maps = {
     'pc_kw': 'Power Consumption (kW)',
-    'drop_ratio': 'drop ratio',
-    'ue_drop_ratio': 'ue drop ratio',
-    'reward': 'reward',
+    # 'drop_ratio': 'drop ratio',
+    # 'ue_drop_ratio': 'ue drop ratio',
+    # 'reward': 'reward',
     # 'cluster_size': 'cluster_size',
     # 'se': 'avg_se',
-    'qos_reward': 'qos',
+    # 'qos_reward': 'qos',
     # "idle_ues": 'idle',
     'active_ues': 'active',
     # "queued_ues": 'wait',
@@ -146,7 +151,7 @@ name_maps = {
     'sm0_cnt': 'active BSs', 'sm1_cnt': 'BSs in SM1',
     'sm2_cnt': 'BSs in SM2', 'sm3_cnt': 'BSs in SM3'
 }
-for i in range(4):
+for i in range(9):
     name_maps[f'bs_{i}_n_ants'] = f'antennas (BS {i})'
 vars_df = df.loc[policies, list(name_maps)].rename(columns=name_maps).copy()
 vars_df['energy efficiency (kb/J)'] = vars_df['data rate (Mb/s)'] / (
@@ -167,11 +172,6 @@ vars_df
 # %%
 stats = df0.groupby(level=[0,1]).mean().rename(columns=name_maps)
 stats
-
-#garbage graph
-#fig = px.scatter(x=[0, 1, 2, 3, 4], y=[0, 1, 4, 9, 16])
-#fig.show()
-#fig.write_image("random.pdf")
 
 # %%
 os.makedirs('sim_plots', exist_ok=True)

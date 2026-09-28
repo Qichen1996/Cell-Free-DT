@@ -9,23 +9,10 @@ from torch.utils.data import DataLoader, Subset
 
 from utils import *
 from arguments import *
-from env import MultiCellNetEnv
 from decision_transformer.utils import TrajectoryDataset, evaluate_on_env
 from decision_transformer.model import DecisionTransformer
 
 
-
-def make_env(args, seed=None):
-    kwds = vars(args).copy()
-    kwds['no_interf'] = False  # always has interference at test time
-    env = MultiCellNetEnv(seed=seed, **{
-        k: v for k, v in kwds.items() if v is not None})
-    pars = inspect.signature(MultiCellNetEnv.__init__).parameters
-    # [setattr(args, k, pars[k].default) for k, v in kwds.items() if v is None]
-    for k, v in kwds.items():
-        if v is None and k in pars:
-            setattr(args, k, pars[k].default)
-    return env
 
 def train(args, env_args):
 
@@ -47,7 +34,7 @@ def train(args, env_args):
     dropout_p = args.dropout_p          # dropout probability
 
     # load data from this file
-    dataset_path = f'{args.dataset_dir}/1.pkl'
+    dataset_path = f'{args.dataset_dir}/ab.pkl'
 
     # saves model and csv in this directory
     log_dir = args.log_dir
@@ -90,10 +77,9 @@ def train(args, env_args):
 
     data_iter = iter(traj_data_loader)
 
-    env = make_env(env_args)
-
-    state_dim = env.observation_space[0].shape[0]
-    act_dim = env.action_space[0].shape[0]
+    # dims from dataset: observations (T, N, state_dim), actions (T, N, act_dim)
+    state_dim = traj_dataset.trajectories[0]['observations'].shape[-1]
+    act_dim = traj_dataset.trajectories[0]['actions'].shape[-1]
 
     model = DecisionTransformer(
         state_dim=state_dim,
@@ -138,37 +124,38 @@ def train(args, env_args):
 
         for _ in range(num_updates_per_iter):
             try:
-                timesteps, states, actions, returns_to_go = next(data_iter)
+                # timesteps, states, actions, returns_to_go = next(data_iter)
+                prompts, timesteps, states, actions, returns_to_go = next(data_iter)
             except StopIteration:
                 data_iter = iter(traj_data_loader)
-                timesteps, states, actions, returns_to_go = next(data_iter)
+                # timesteps, states, actions, returns_to_go = next(data_iter)
+                prompts, timesteps, states, actions, returns_to_go = next(data_iter)
 
             timesteps = timesteps.to(device)    # B x T
             states = states.to(device)          # B x T x N x state_dim
             actions = actions.to(device)        # B x T x N x act_dim
             returns_to_go = returns_to_go.to(device)  # B x T x N x 1
-            action_target = torch.clone(actions).detach().to(device)
+            prompts = prompts.to(device)
 
             B, T, N, state_dim = states.shape
             act_dim = actions.shape[-1]
 
-            states_flat = states.reshape(B * N, T, state_dim)
-            actions_flat = actions.reshape(B * N, T, act_dim)
-            returns_to_go_flat = returns_to_go.reshape(B * N, T, 1)
-            timesteps_flat = timesteps.unsqueeze(2).expand(B, T, N).reshape(B * N, T)
+            states_flat = states.permute(0, 2, 1, 3).reshape(B * N, T, state_dim)
+            actions_flat = actions.permute(0, 2, 1, 3).reshape(B * N, T, act_dim)
+            returns_to_go_flat = returns_to_go.permute(0, 2, 1, 3).reshape(B * N, T, 1)
+            timesteps_flat = timesteps.unsqueeze(1).expand(B, N, T).reshape(B * N, T)
+            prompts_flat = prompts[:, None].expand(B, N).reshape(B * N)
 
-            action_preds, action_logits, _ = model.forward(
+            action_logits = model.forward(
                                                     timesteps=timesteps_flat,
                                                     states=states_flat,
                                                     actions=actions_flat,
-                                                    returns_to_go=returns_to_go_flat
+                                                    returns_to_go=returns_to_go_flat,
+                                                    prompts=prompts_flat,
                                                 )
 
-            action_preds = action_preds.reshape(B, N, T, act_dim).permute(0, 2, 1, 3).contiguous()
-
-            target_1 = action_target[..., 0].long()
-            target_2 = action_target[..., 1].long()
-            target_3 = action_target[..., 2].long()
+            target_1 = actions_flat[..., 0].long()
+            target_2 = actions_flat[..., 1].long()
 
             loss1 = F.cross_entropy(
                 action_logits[0].reshape(-1, action_logits[0].size(-1)),
@@ -180,14 +167,8 @@ def train(args, env_args):
                 target_2.reshape(-1),
                 reduction='mean'
             )
-            loss3 = F.cross_entropy(
-                action_logits[2].reshape(-1, action_logits[2].size(-1)),
-                target_3.reshape(-1),
-                reduction='mean'
-            )
 
-            action_loss = (loss1 + loss2 + loss3) / 3
-            # action_loss = loss1
+            action_loss = (loss1 + loss2) / 2
             
             optimizer.zero_grad()
             action_loss.backward()
@@ -270,7 +251,7 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=5e-4)
     parser.add_argument('--wt_decay', type=float, default=1e-4)
 
-    parser.add_argument('--max_train_iters', type=int, default=2500)
+    parser.add_argument('--max_train_iters', type=int, default=1500)
     parser.add_argument('--num_updates_per_iter', type=int, default=150)
 
     parser.add_argument('--seed', type=int, default=1)

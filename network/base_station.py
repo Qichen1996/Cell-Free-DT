@@ -2,7 +2,7 @@ from utils import *
 from . import config
 from .env_utils import *
 from .user_equipment import UserEquipment, UEStatus
-from traffic.config import numApps
+from traffic.config import numApps, delayBudgets
 from config import *
 from visualize.obs import anim_rolling
     
@@ -36,9 +36,8 @@ class BaseStation:
     buffer_shape = config.bufferShape
     buffer_chunk_size = config.bufferChunkSize
     buffer_num_chunks = config.bufferNumChunks
-    urgent_time_lim = 0.02
     ue_stats_dim = 3
-    all_ue_stats_dim = 2 * ue_stats_dim
+    all_ue_stats_dim = 3 * ue_stats_dim
     hist_stats_dim = buffer_num_chunks * buffer_shape[1]
     mutual_obs_dim = 1 + ue_stats_dim
     
@@ -50,7 +49,8 @@ class BaseStation:
         [[0, 1]] * num_sleep_modes +        # next sleep mode
         [[0, max(wakeup_delays)]] +         # wakeup time
         [[0, np.inf]] * hist_stats_dim +    # history stats
-        [[0, np.inf]] * all_ue_stats_dim    # ue stats
+        # [[0, np.inf]] * all_ue_stats_dim    # ue stats
+        [[0, np.inf]] * (2 * all_ue_stats_dim)
     )
     mutual_obs_space = make_box_env([[0, np.inf]] * mutual_obs_dim)
     self_obs_space = concat_box_envs(public_obs_space, private_obs_space)
@@ -97,7 +97,9 @@ class BaseStation:
         self.ues.clear()
         self.queue.clear()
         self.covered_ues.clear()
-        self._ue_stats = np.zeros((2, 2))
+        self._ue_stats = np.zeros((3, 2, 2))
+        self._packet_stats = np.zeros((3, 2), dtype=np.int64)
+        self._packet_totals = np.zeros((3, 2), dtype=np.int64)
         self.sleep = 0
         self.conn_mode = 1
         self.num_ant = self.max_antennas
@@ -164,6 +166,7 @@ class BaseStation:
         self._steps = 0
         self._timer = 0
         self._ue_stats[:] = 0
+        self._packet_stats[:] = 0
         # self._disc_all = 0  # used to mark a disconnect_all action
         self._arrival_rate = 0
         self._energy_consumed = 0
@@ -271,22 +274,6 @@ class BaseStation:
         #     self.consume_energy(energy_cost, 'antenna')
         num_ant_new = self.num_ant + num_switch
         
-
-        # h = self.net.world_time_repr[5:]
-
-        # if "02:59" <= h < "03:59":
-        #     num_ant_new = 3
-        # elif h < "02:59" or "03:59" <= h < "06:59" or h >= "20:59":
-        #     num_ant_new = 4
-        # elif (h >= "06:59" and h < "07:59") or (h >= "18:59" and h < "20:59"):
-        #     num_ant_new = 5
-        # elif (h >= "07:59" and h < "08:59"):
-        #     num_ant_new = 6
-        # elif (h >= "08:59" and h < "10:59") or (h >= "15:59" and h < "18:59"):
-        #     num_ant_new = 7
-        # else:
-        #     num_ant_new = 8
-        
         if (num_ant_new < self.min_antennas or
             num_ant_new > self.max_antennas):
             return  # invalid action
@@ -300,6 +287,8 @@ class BaseStation:
         self.update_power_allocation()
 
     def switch_sleep_mode(self, mode):
+        if self._next_sleep < self.sleep:
+            return
         mode = min(mode, self._max_sleep)
 
         # mode = self._max_sleep if mode > 1 else 0
@@ -321,6 +310,7 @@ class BaseStation:
             self._prev_sleep = self.sleep
             self.sleep = mode
         elif mode < self.sleep:
+            self._wake_timer = 0
             self._wake_delay = self.wakeup_delays[self.sleep] - self.wakeup_delays[mode]
 
     def switch_connection_mode(self, mode):
@@ -394,7 +384,9 @@ class BaseStation:
         self.covered_ues.remove(ue)
         if EVAL:
             self._total_stats['cell_traffic'] += ue.total_demand
-            self._total_stats['cell_dropped_traffic'] += max(0, ue.demand)
+            self._total_stats['cell_dropped_traffic'] += ue.dropped_bits
+            self._total_stats['cell_num_ues'] += 1
+            self._total_stats['cell_num_dropped_ues'] += int(ue.dropped_packets > 0)
 
     # def takeover_all(self):
     #     if self.covered_ues and DEBUG:
@@ -439,7 +431,7 @@ class BaseStation:
     def alloc_power(self):
         if not self.ues: return
         if len(self.ues) > 1:
-            alpha = 0
+            alpha = 1
             beta = 1
             gamma = np.array([ue._gamma[self.id] for ue in self.ues.values()])
             r = np.array([ue.required_rate for ue in self.ues.values()]) / 1e7
@@ -466,14 +458,14 @@ class BaseStation:
         # if EVAL:
         #     self._total_stats['sleep_time'][self.sleep] += dt
         if self._next_sleep == self.sleep:
-            if self.queue and self.sleep in (1, 2):
-                if DEBUG:
-                    info('BS {}: automatically waking up'.format(self.id))
-                self.switch_sleep_mode(0)
-            elif self.sleep == 0 and not self.ues:
-                if DEBUG:
-                    info('BS {}: automatically goes to sleep'.format(self.id))
-                self.switch_sleep_mode(1)
+            # if self.queue and self.sleep in (1, 2):
+            #     if DEBUG:
+            #         info('BS {}: automatically waking up'.format(self.id))
+            #     self.switch_sleep_mode(0)
+            # elif self.sleep == 0 and not self.ues:
+            #     if DEBUG:
+            #         info('BS {}: automatically goes to sleep'.format(self.id))
+            #     self.switch_sleep_mode(1)
             return
         self._wake_timer += dt
         if self._wake_timer >= self._wake_delay:
@@ -520,50 +512,6 @@ class BaseStation:
         while self.queue:
             self.pop_from_queue()
 
-    @timeit
-    # def compute_power_consumption(
-    #     self, eta=0.25, eps=8.2e-3, Ppa_max=config.maxPAPower,
-    #     Psyn=1, Pbs=1, Pcd=1, Lbs=12.8, Tc=5000, Pfixed=config.fixedPC, C={},
-    #     sleep_deltas=config.sleepModeDeltas
-    # ):
-    #     """
-    #     Reference: 
-    #     Args:
-    #     - eta: max PA efficiency of the BS
-    #     - Ppa_max: max PA power consumption
-    #     - Psyn: sync power
-    #     - Pbs: power consumption of circuit components
-    #     - Pcd: power consumption of coding/decoding
-        
-    #     Returns:
-    #     The power consumption of the BS in Watts.
-    #     """
-    #     M = self.max_antennas
-    #     m = self.num_ant
-    #     K = self.num_ue
-    #     S = self.sleep
-    #     R = 0
-    #     if 'K3' not in C:
-    #         B = self.bandwidth / 1e9
-    #         # assume ET-PA (envelope tracking power amplifier)
-    #         C['PA-fx'] = eps * Ppa_max / ((1 + eps) * eta)
-    #         C['PA-ld'] = self.tx_power / ((1 + eps) * eta)
-    #         C['K3'] = B / (3 * Tc * Lbs)
-    #         C['MK1'] = (2 + 1/Tc) * B / Lbs
-    #         C['MK2'] = 3 * B / Lbs
-    #     Pnl = M * (C['PA-fx'] + Pbs) + Psyn + Pfixed  # no-load part of PC
-    #     Pld = 0  # load-dependent part of PC
-    #     if S:
-    #         Pnl *= sleep_deltas[S]
-    #     elif K > 0:
-    #         R = sum(ue.data_rate for ue in self.ues.values()) / 1e9
-    #         Pld = Pcd*R + C['K3']*K**3 + m * (C['PA-ld'] + C['MK1']*K + C['MK2']*K**2)
-    #     P = Pld + Pnl
-    #     if EVAL:
-    #         rec = dict(bs=self.id, M=M, m=m, K=K, R=R, S=S, Pnl=Pnl, Pld=Pld, P=P)
-    #         # self.net.add_stat('pc', rec)
-    #         debug(f'BS {self.id}: {kwds_str(**rec)}')
-    #     return P
 
     def compute_power_consumption(
             self,
@@ -701,39 +649,42 @@ class BaseStation:
 
     @property
     def drop_ratio(self):
-        """ Average ratio of dropped demand for each app category in the current step. """
-        return div0(self._ue_stats[1, 1], self._ue_stats[1, 0])
+        """Packet drops / packet outcomes in the current action step."""
+        # return div0(self._ue_stats[1, 1], self._ue_stats[1, 0])
+        n_total = self._packet_stats.sum(axis=1)
+        drop_sum = self._packet_stats[:, 1]
+
+        drop_ratio = np.divide(
+            drop_sum,
+            n_total,
+            out=np.zeros_like(drop_sum, dtype=np.float64),
+            where=n_total > 0,
+        )
+        return drop_ratio
 
     @property
     def delay_ratio(self):
         """ Average delay/budget for each app category in the current step. """
-        return div0(self._ue_stats[0, 1], self._ue_stats[0, 0])
-    
-    def get_reward(self, w_qos, w_xqos, w_pc):
+        # return div0(self._ue_stats[0, 1], self._ue_stats[0, 0])
+        return np.array([
+            div0(self._ue_stats[i, 0, 1], self._ue_stats[i, 0, 0])
+            for i in range(3)
+        ], dtype=np.float32)
+
+    def get_reward(self, w_str, w_sen, w_tol, w_pc):
         pc_kw = self.power_consumption * 1e-3
-        n_done = self._ue_stats[0,0]
-        q_del = self.delay_ratio
-        n_drop = self._ue_stats[1,0]
-        q_drop = self.drop_ratio
-        n = n_done + n_drop + 1e-6
-        # r_qos = (-n_drop * q_drop + w_xqos * n_done * (1 - q_del)) / n
-        r_qos = - q_drop
-        reward = w_qos * r_qos - pc_kw * w_pc
-        # print(f'{self.net.world_time_repr}  n_drop: {n_drop}  n_done: {n_done} qos: {r_qos:.5f}  pc: {pc_kw:.5f}  reward: {reward:.5f}')
-        # if n_drop > 0:
-        #     print(q_drop)
-        #     sys.exit()
+    
+        # QoS weights for the three UE classes
+        w_qos = np.array([w_str, w_sen, w_tol], dtype=np.float32)
+        drop_ratio = self.drop_ratio
+    
+        # Weighted QoS penalty
+        r_qos = -np.sum(w_qos * drop_ratio)
+    
+        reward = r_qos - w_pc * pc_kw
+    
         return reward
-        
-    # @timeit
-    # @cache_obs
-    # def get_observation(self):
-    #     obs = [self.observe_self()]
-    #     for bs in self.net.bss.values():
-    #         if bs is self: continue
-    #         obs.append(bs.observe_self()[:bs.public_obs_dim])
-    #         obs.append(self.observe_mutual(bs))
-    #     return np.concatenate(obs, dtype=np.float32)
+
     
     @timeit
     @cache_obs
@@ -742,15 +693,17 @@ class BaseStation:
         num_bs = 0
         for bs in self.net.bss.values():
             if bs is self: continue
-            if self.neighbor_dist(bs.id) > self.inter_dist * 1.2: continue
+            if self.neighbor_dist(bs.id) > self.inter_dist * 1.5: continue
             pub_obs = bs.observe_self()[:bs.public_obs_dim]
             mut_obs = self.observe_mutual(bs)
             obs.append(pub_obs)
             obs.append(mut_obs)
             num_bs += 1
         while num_bs < 8:
-            pub_zero = np.zeros_like(pub_obs)
-            mut_zero = np.zeros_like(mut_obs)
+            # A sparse deployment can have no neighbor within the distance
+            # threshold, so construct padding from the fixed observation sizes.
+            pub_zero = np.zeros(self.public_obs_dim, dtype=np.float32)
+            mut_zero = np.zeros(self.mutual_obs_dim, dtype=np.float32)
             obs.append(pub_zero)
             obs.append(mut_zero)
             num_bs += 1
@@ -771,7 +724,8 @@ class BaseStation:
             onehot_vec(self.num_sleep_modes, self._next_sleep),
             [self.wakeup_time],
             self.get_history_stats(),
-            self.get_all_ue_stats().reshape(-1)
+            self.get_all_ue_stats().reshape(-1),
+            self.get_queue_ue_stats().reshape(-1),
         ], dtype=np.float32)
 
     @timeit
@@ -801,30 +755,52 @@ class BaseStation:
 
     @cache_obs
     def get_all_ue_stats(self):
-        serving_ues = []
-        queued_ues = []
-        # idle_ues = []
-        for ue in self.covered_ues:             
-            if ue in self.ues.values():
-                serving_ues.append(ue)
-            elif ue in self.queue:
-                queued_ues.append(ue)
-            # else:
-            #     idle_ues.append(ue)
-        # return np.array([self.get_ue_stats(ues) for ues in
-        #                  [self.covered_ues, serving_ues, queued_ues]],
-        #                 dtype=np.float32)
-        return np.array([self.get_ue_stats(ues) for ues in
-                         [serving_ues, queued_ues]], dtype=np.float32)
+        delay_50_ues = []
+        delay_150_ues = []
+        delay_300_ues = []
+    
+        # remaining time is binned by the delay budgets in traffic/config.py
+        for ue in self.covered_ues:
+            delay = ue.time_limit
+
+            if delay <= delayBudgets[0]:
+                delay_50_ues.append(ue)
+            elif delay <= delayBudgets[1]:
+                delay_150_ues.append(ue)
+            elif delay <= delayBudgets[2]:
+                delay_300_ues.append(ue)
+    
+        return np.array(
+            [self.get_ue_stats(ues) for ues in
+             [delay_50_ues, delay_150_ues, delay_300_ues]],
+            dtype=np.float32
+        )
+
+    @cache_obs
+    def get_queue_ue_stats(self):
+        delay_50_ues = []
+        delay_150_ues = []
+        delay_300_ues = []
+
+        for ue in self.queue:
+            delay = ue.time_limit
+
+            if delay <= delayBudgets[0]:
+                delay_50_ues.append(ue)
+            elif delay <= delayBudgets[1]:
+                delay_150_ues.append(ue)
+            elif delay <= delayBudgets[2]:
+                delay_300_ues.append(ue)
+
+        return np.array(
+            [self.get_ue_stats(ues) for ues in
+             [delay_50_ues, delay_150_ues, delay_300_ues]],
+            dtype=np.float32,
+        )
 
     def get_ue_stats(self, ues):
         if not ues:
             return np.zeros(self.ue_stats_dim, dtype=np.float32)
-        # stats = np.array([
-        #     [ue.data_rate, ue.required_rate, ue.tx_power, ue.time_limit]
-        #     for ue in ues]).T
-        # return [len(ues), stats[0].sum() / 1e6, stats[1].sum() / 1e6,
-        #         stats[2].sum(), np.sum(stats[3] <= self.urgent_time_lim)]
         stats = np.array([[ue.data_rate, ue.required_rate] for ue in ues]).T
         return [len(ues), stats[0].sum() / 1e6, stats[1].sum() / 1e6]
 
@@ -856,6 +832,11 @@ class BaseStation:
         return infos
     
     def calc_total_stats(self):
+        for z in range(numApps):
+            self._total_stats[f'completed_packets_{z}'] = self._packet_totals[z, 0]
+            self._total_stats[f'dropped_packets_{z}'] = self._packet_totals[z, 1]
+            self._total_stats[f'packet_drop_ratio_{z}'] = div0(
+                self._packet_totals[z, 1], self._packet_totals[z].sum())
         d = self._total_stats
         for k in self._stats:
             d['avg_'+k] = div0(d.pop(k), d['steps'])
@@ -870,7 +851,7 @@ class BaseStation:
         d['avg_reject_rate'] = div0(
             d['num_rejects'], d['num_requests'])
         d['avg_cell_drop_ratio'] = div0(
-            d['cell_dropped_traffic'], d['cell_traffic'])
+            d['cell_num_dropped_ues'], d['cell_num_ues'])
         d['avg_cell_data_rate'] = div0(
             d['cell_traffic'], d['time'])
         d['avg_sleep_switch_fps'] = div0(

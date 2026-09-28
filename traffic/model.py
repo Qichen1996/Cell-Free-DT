@@ -15,17 +15,13 @@ except ImportError:
 
 
 class TrafficType(enum.IntEnum):
-    # UNKNOWN = 0
-    A = 1
-    B = 2
-    C = 3
-    # D = 4
-    # E = 5
+    A = 0  # Kista
+    B = 1  # Sergelgatan
+    C = 2  # Rinkeby
 
 class TrafficModel:
     file_size = config.fileSize  # in bits
     delay_budgets = config.delayBudgets
-    min_data_rates = file_size / np.array(delay_budgets) / 1e6  # Mb/s
     num_apps = config.numApps
     app_names = config.appNames
     period = 60 * 60 * 24 * 7  # a week (in seconds)
@@ -41,14 +37,12 @@ class TrafficModel:
             if scenario is None:
                 self.sample_rate = 1
             else:
-                self.sample_rate = self.sample_rates[scenario.value - 1]
+                self.sample_rate = self.sample_rates[scenario.value]
         else:
             self.sample_rate = sample_rate
 
     @classmethod
     def from_scenario(cls, scenario='RANDOM', **kwargs):
-        level = TrafficType[scenario]
-        scenario = "B"
         if type(scenario) is str:
             s = scenario.upper()
             if s == 'RANDOM':
@@ -58,23 +52,19 @@ class TrafficModel:
             scenario = TrafficType(scenario)
         profiles_df = pd.read_csv(cls.profiles_path, index_col=[0, 1, 2])
         profile = profiles_df.loc[int(scenario)]
-        return cls(scenario=scenario, **kwargs).fit(profile, level)
+        return cls(scenario=scenario, **kwargs).fit(profile)
     
     @classmethod
     def seed(cls, seed):
         cls._rng = np.random.default_rng(seed)
         
-    def fit(self, data_rate_df, level, smoothen=True):
+    def fit(self, data_rate_df, smoothen=True):
         """ Fit the traffic model to the given traffic trace dataset. """
         assert data_rate_df.shape[1] == self.num_apps
         df = data_rate_df[self.app_names] / self.sample_rate
         self.interval, rem = divmod(self.period, len(df))
         assert rem == 0, (self.interval, rem)
-        df = df.mean() * level * 2 + df
-        
         self.rates = df * self.area / self.file_size  # files / s
-        assert self.rates.values.max() * 1e-3 <= 1.
-
         self.densities = df / 1e6
         df = pd.concat([self.densities, self.rates], axis=1, keys=['Mb/s/km^2', 'files/s'])
         total_df = df.T.groupby(level=0).sum().T
@@ -102,19 +92,12 @@ class TrafficModel:
         """ Randomly generate traffic for the given time.
         
         Returns:
-        A list of length n_apps, each element is either (traffic-demand, delay-budget) or False.
+            A length-``num_apps`` array. Entry ``z`` is the number of independent
+            UE arrivals of service ``z`` during ``[time, time + dt)``.
         """
-        # arrivals = []
-        # for lam, delay in zip(self.get_arrival_rates(time, dt), self.delay_budgets):
-        #     n = self._rng.poisson(lam)
-        #     if n > 0:
-        #         arrivals.append((n * self.file_size, n * delay))
-        #         # arrivals.append((self.file_size, delay) * n)
-        #     else:
-        #         arrivals.append((None, None))
-        # return arrivals
-        return [(self.file_size, delay) if self._rng.random() < p else (None, None)
-                for p, delay in zip(self.get_arrival_rates(time, dt), self.delay_budgets)]
+        # get_arrival_rates already multiplies the rate by dt, so each entry is
+        # the Poisson mean for the current simulation step.
+        return self._rng.poisson(self.get_arrival_rates(time, dt))
 
     def _get_time_loc(self, time):
         return int((time / self.period) % 1 * len(self.rates))

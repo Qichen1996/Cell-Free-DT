@@ -28,6 +28,9 @@ class MultiCellNetEnv(MultiAgentEnv):
     # w_delay = config.delayWeight
     w_pc = config.pcWeight
     w_qos = config.qosWeight
+    w_str=400
+    w_sen=200
+    w_tol=40
     w_xqos = config.extraQosWeight
     episode_time_len = config.episodeTimeLen
     bs_poses = net_config.bsPositions
@@ -49,6 +52,9 @@ class MultiCellNetEnv(MultiAgentEnv):
         dpi_sample_rate=None,
         w_pc=w_pc,
         w_qos=w_qos,
+        w_str=w_str,
+        w_sen=w_sen,
+        w_tol=w_tol,
         w_xqos=w_xqos,
         # w_drop=w_drop,
         # w_delay=w_delay,
@@ -66,6 +72,9 @@ class MultiCellNetEnv(MultiAgentEnv):
             traffic_scenario=scenario,
             accelerate=accelerate,
             w_qos=w_qos,
+            w_str=w_str,
+            w_sen=w_sen,
+            w_tol=w_tol,
             w_xqos=w_xqos,
             w_pc=w_pc,
             has_interference=not no_interf,
@@ -92,6 +101,9 @@ class MultiCellNetEnv(MultiAgentEnv):
         self.w_pc = w_pc
         self.w_qos = w_qos
         self.w_xqos = w_xqos
+        self.w_str = w_str
+        self.w_sen = w_sen
+        self.w_tol = w_tol
         # self.w_drop = w_drop
         # self.w_delay = w_delay
             
@@ -141,15 +153,14 @@ class MultiCellNetEnv(MultiAgentEnv):
     def get_reward(self, state):
         # pc, n_done, q_del, n_drop, q_drop = state[:5]
         pc = self.net.power_consumption
-        n_done = self.net._ue_stats[0,0]
-        q_del = self.net.delay_ratio
-        n_drop = self.net._ue_stats[1,0]
-        q_drop = self.net.drop_ratio
+        # n_done = self.net._ue_stats[:,0,0]
+        # n_drop = self.net._ue_stats[:,1,0]
         pc_kw = pc * 1e-3
-        n = n_done + n_drop + 1e-6
-        r_qos = (-n_drop * q_drop + self.w_xqos * n_done * (1 - q_del)) / n
-        r_qos = - q_drop
-        reward = self.w_qos * r_qos - pc_kw * self.w_pc      # dqn 0.1 mappo 0.4 0.5
+        # n_total = n_done + n_drop
+        drop_ratio = self.net.drop_ratio
+        str_drop = drop_ratio[0]
+        sen_drop = drop_ratio[1]
+        tor_drop = drop_ratio[2]
         bs_reward = [self.net.get_bs_reward(i) for i in range(self.num_agents)]
         reward = np.mean(bs_reward)
         se_list = [ue.SE for ue in self.net.ues.values()]
@@ -157,17 +168,17 @@ class MultiCellNetEnv(MultiAgentEnv):
         arrival_rate = self.net.arrival_rates.sum()
         # dropped = dr @ self.w_drop_cats
         # delay = dl @ self.w_delay_cats
-        # reward = -(self.w_drop * dropped + self.w_pc * pc + self.w_delay * delay)
+        w_qos = np.array([self.w_str, self.w_sen, self.w_tol], dtype=np.float32)
+        # reward = - np.sum(w_qos * drop_ratio) - self.w_pc * pc_kw
         r_info = dict(
-            drop_ratio=q_drop,
-            ue_drop_ratio=n_drop / n,
+            reward=reward,
+            str_drop=str_drop,
+            sen_drop=sen_drop,
+            tor_drop=tor_drop,
             arrival_rate=arrival_rate,
             avg_se=avg_se,
-            delay_ratio=q_del,
-            qos_reward=r_qos,
             pc_kw=pc_kw,
-            reward=reward,
-            n_drop=n_drop,
+            # n_drop=n_drop,
         )
             # num_ue=self.net.num_ue,
             # ant_num=self.net.avg_num_antennas())
@@ -264,12 +275,12 @@ class MultiCellNetEnv(MultiAgentEnv):
     def info_dict(self):
         info = self.net.info_dict(include_bs=self.include_bs_info)
         info.update(
-            reward = self._sim_steps and self._reward_stats[-1]['reward'],
+            # reward = self._sim_steps and self._reward_stats[-1]['reward'],
             pc_kw = self._sim_steps and self._reward_stats[-1]['pc_kw'],
             # se = self._sim_steps and self._reward_stats[-1]['avg_se'],
-            qos_reward = self._sim_steps and self._reward_stats[-1]['qos_reward'],
-            drop_ratio = self._sim_steps and self._reward_stats[-1]['drop_ratio'],
-            ue_drop_ratio = self._sim_steps and self._reward_stats[-1]['ue_drop_ratio'],
+            # qos_reward = self._sim_steps and self._reward_stats[-1]['qos_reward'],
+            # drop_ratio = self._sim_steps and self._reward_stats[-1]['drop_ratio'],
+            # ue_drop_ratio = self._sim_steps and self._reward_stats[-1]['ue_drop_ratio'],
         )
         return info
     

@@ -247,6 +247,9 @@ def get_env_config():
                         help="weight of power consumption in reward")
     parser.add_argument("--w_qos", type=float,
                         help="weight of QoS in reward")
+    parser.add_argument("--w_str", type=float)
+    parser.add_argument("--w_sen", type=float)
+    parser.add_argument("--w_tol", type=float)
     parser.add_argument("--w_xqos", type=float,
                         help="weight of extra QoS in QoS reward"),
     return parser

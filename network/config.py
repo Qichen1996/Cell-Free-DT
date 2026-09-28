@@ -4,10 +4,10 @@ from utils import dB2lin, lin2dB
 renderMode = 'none'
 
 # base station params
-numBS = 16
-interBSDist = 200  # the distance between two adjacent BSs
+numBS = 16  # 5 x 5 grid, see bsPositions below
+interBSDist = 1000 / 4  # distance between adjacent BSs in the 5 x 5 grid over 1000 x 1000 m²
 # cellRadius = 750  # the radius of a hexagon cell in meters
-txPower = 0.25  # average transmit power per antenna in watts
+txPower = 0.1  # average transmit power per antenna in watts
 maxPAPower = 3  # maximum antenna power in watts
 fixedPC = 18  # load-independent power consumption in watts
 bsFrequency = 5e9  # carrier frequency in Hz
@@ -22,11 +22,11 @@ bsHeight = 15  # height of a BS in meters
 powerAllocBase = 2.
 antennaSwitchOpts = [-1, 0, 1]
 clusterSizeOpts = [-1, 0, 1]
-# sleepModeDeltas = [1, 0.69, 0.50, 0.29]
-sleepModeDeltas = [1, 0.675, 0.55, 0.23]
+sleepModeDeltas = [1, 0.69, 0.50, 0.29]
+# sleepModeDeltas = [1, 0.675, 0.55, 0.23]
 # sleepModeDeltas = [1, 0.69, 0.50]
-# wakeupDelays = [0, 1e-3, 1e-2, 1e-1]
-wakeupDelays = [0, 37e-6, 5e-4, 5e-3]
+wakeupDelays = [0, 1e-3, 1e-2, 1e-1]
+# wakeupDelays = [0, 37e-6, 5e-4, 5e-3]
 # wakeupDelays = [0, 1e-3, 1e-2]
 antSwitchEnergy = 0  # energy consumption of switch per antenna in Joules
 sleepSwitchEnergy = [0, 0, 0, 0]  # energy consumption of switching sleep mode in Joules
@@ -45,14 +45,14 @@ ueHeight = 1.5  # height of a UE in meters
 
 # default network configuration
 
-def square_grid_centers(rows=5, cols=5, area_w=1000.0, area_h=1000.0):
+def square_grid_centers(rows=5, cols=5, area_w=500.0, area_h=500.0):
     xs = np.linspace(area_w/(2*cols), area_w - area_w/(2*cols), cols)
     ys = np.linspace(area_h/(2*rows), area_h - area_h/(2*rows), rows)
     centers = np.array([(x, y) for y in ys for x in xs])
     return centers
 
-bsPositions = square_grid_centers(4, 4, 800.0, 800.0)
-areaSize = np.array([800.0, 800.0])
+areaSize = np.array([1000.0, 1000.0])
+bsPositions = square_grid_centers(4, 4, *areaSize)
 
 # def calculate_hex_centers(rows, cols, size=1):
 #     """Calculate hexagonal grid centers."""
@@ -92,12 +92,12 @@ probeGridSize = 20
 # public_obs_keys = ['pc', 'num_antennas', 'sleep_mode']
 hist_stats_keys = ['arrival_rate']
 # ue_groups = ['covered', 'serving', 'queued']
-# ue_stats_keys = ['num', 'sum_rate', 'sum_rate_req', 'sum_tx_power', 'num_urgent']
+# ue_stats_keys = ['num', 'sum_rate', 'sum_rate_req', 'sum_tx_power']
 # private_obs_keys = ['next_sleep_mode', 'wakeup_time',
 #                     *[f'{k}{i}' for i in range(-bufferNumChunks, 0) for k in hist_stats_keys],
 #                     *[f'{u}_{k}' for u in ue_groups for k in ue_stats_keys]]
 public_obs_keys = ['pc', 'num_antennas', 'sleep_mode']
-ue_groups = ['serving', 'queued']
+ue_groups = [f'{group}_urgency{i}' for group in ('covered', 'queued') for i in range(3)]
 ue_stats_keys = ['num', 'sum_rate', 'sum_rate_req']
 private_obs_keys = ['next_sleep_mode', 'wakeup_time', 
                     *[f'{k}{i}' for i in range(-bufferNumChunks, 0) for k in hist_stats_keys],
@@ -126,7 +126,6 @@ P_cloud_proc0  = 20.8     # W, idle GPP power
 proc_slope_GPP = 74       # W per (C/Cmax)
 C_GPP_max      = 200      # GOPS capability of the cloud GPP
 P_olt          = 20       # W, optical line card
-
 
 
 

@@ -22,3 +22,5 @@
 # /config.py
 critic*.pt
 /database/
+__pycache__/
+/dt_results/

@@ -2,13 +2,11 @@ import random
 import time
 import pickle
 import torch
-import seaborn as sns
 import numpy as np
-import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 from utils import *
 
-
+traffic_to_prompt = {"A": 0, "B": 1, "C": 2}
 
 def discount_cumsum(x, gamma):
     
@@ -18,61 +16,24 @@ def discount_cumsum(x, gamma):
     T, N, _ = x.shape
     disc_cumsum = np.zeros_like(x, dtype=np.float32)  # (T, N, 1)
 
-    for j in range(N):
-        disc_cumsum[-1, j, 0] = x[-1, j, 0]
-        for t in reversed(range(T - 1)):
-            disc_cumsum[t, j, 0] = x[t, j, 0] + gamma * disc_cumsum[t + 1, j, 0]
+    # loop over time only; all agents are updated at once
+    disc_cumsum[-1] = x[-1]
+    for t in reversed(range(T - 1)):
+        disc_cumsum[t] = x[t] + gamma * disc_cumsum[t + 1]
             
     return disc_cumsum
 
-def plot_attention_map(attn_map, context_len=10, save_path="attn_map.png", show=False):
-    """
-    可视化 Decision Transformer 的注意力矩阵（仅包含 s, a 两类 token）
-    每个时间步包含 s, a 两种 token，因此序列长度 T = 2 * context_len
-    """
-    # ---- 转 numpy ----
-    if not isinstance(attn_map, np.ndarray):
-        attn_map = attn_map.detach().cpu().numpy()
-
-    T = attn_map.shape[0]
-    expected_T = 3 * context_len
-    assert (
-        T == expected_T
-    ), f"attn_map shape {T} 与 3*context_len={expected_T} 不匹配"
-
-    token_labels = ["r", "s", "a"]  # 只有 state 和 action
-
-    # ---- 画图 ----
-    plt.figure(figsize=(7, 6))
-    sns.heatmap(attn_map, cmap="viridis", square=True, cbar=True)
-    plt.title(f"Attention Map (context_len={context_len})", fontsize=12)
-    plt.xlabel("Key tokens (past)")
-    plt.ylabel("Query tokens (current)")
-
-    # ---- 添加分割线：蓝=s, 绿=a ----
-    colors = ["red", "blue", "green"]
-    for i in range(context_len):
-        for j, color in enumerate(colors):
-            idx = 3 * i + j
-            plt.axvline(idx, color=color, linestyle="--", linewidth=0.6)
-            plt.axhline(idx, color=color, linestyle="--", linewidth=0.6)
-
-    # ---- 添加 tick label ----
-    tick_pos = np.arange(1.5, 3 * context_len, 3)
-    tick_labels = [f"{label}{i}" for i in range(context_len) for label in token_labels]
-    plt.xticks(range(T), tick_labels, rotation=90, fontsize=6)
-    plt.yticks(range(T), tick_labels, rotation=0, fontsize=6)
-    plt.tight_layout()
-    plt.savefig(save_path, dpi=300) 
-    if show:
-        plt.show()
-    plt.close()
-
-    print(f"✅ Attention map saved at: {save_path}")
-
+@torch.no_grad()
 def evaluate_on_env(args, model, device, context_len, env, rtg_target, rtg_scale, max_test_ep_len, state_mean=None, state_std=None):
 
-    eval_batch_size = 4  # required for forward pass
+    eval_batch_size = env.num_agents  # required for forward pass
+
+    prompts = torch.full(
+        (eval_batch_size,),
+        traffic_to_prompt[env.net.scenario],
+        dtype=torch.long,
+        device=device,
+    )
 
     results = {}
 
@@ -126,21 +87,9 @@ def evaluate_on_env(args, model, device, context_len, env, rtg_target, rtg_scale
     total_drop_ratio = 0
     steps = 0
 
-    obs_buffer = []
-    act_buffer = []
-    rew_buffer = []
-    saliency_list = []
-    attn_sum = None
-    count = 0
-
     for t in trange(max_test_ep_len, file=sys.stdout):
 
         # add state in placeholder
-        # state = torch.from_numpy(np.stack(obs)).to(device)
-        # state = (state - state_mean) / state_std
-        # state.requires_grad_(True)
-        # states[:, t] = state
-        
         states[:, t] = torch.from_numpy(np.stack(obs)).to(device)
         states[:, t] = (states[:, t] - state_mean) / state_std
 
@@ -149,40 +98,26 @@ def evaluate_on_env(args, model, device, context_len, env, rtg_target, rtg_scale
         rewards_to_go[:, t] = running_rtg
 
         if t < context_len:
-            act_preds, logits, attn_map = model.forward(timesteps[:,:context_len],
-                                                        states[:,:context_len],
-                                                        actions[:,:context_len],
-                                                        rewards_to_go[:,:context_len])
-            act = act_preds[:, t].unsqueeze(1).detach()
+            logits = model.forward(timesteps[:,:context_len],
+                                   states[:,:context_len],
+                                   actions[:,:context_len],
+                                   rewards_to_go[:,:context_len],
+                                   prompts=prompts,)
+            idx = t
         else:
-            act_preds, logits, attn_map = model.forward(timesteps[:,t-context_len+1:t+1],
-                                                        states[:,t-context_len+1:t+1],
-                                                        actions[:,t-context_len+1:t+1],
-                                                        rewards_to_go[:,t-context_len+1:t+1])
-            act = act_preds[:, -1].unsqueeze(1).detach()
-
-        # attn_cur = attn_map.mean(dim=1).detach().cpu()  # 平均多头，形状 [B, T, T]
-        # attn_sum = attn_cur if attn_sum is None else attn_sum + attn_cur
-        # count += 1
-        
-        # act_idx = torch.argmax(logits[0], dim=-1) 
-        # model.zero_grad()
-        # target_logit = torch.gather(logits[0], dim=2, index=act_idx.unsqueeze(-1))
-        # target_logit = target_logit.mean()
-        # target_logit.backward(retain_graph=True)
-        # saliency = (state * state.grad).abs().mean(dim=0).detach().cpu().numpy()
-        # # print(f"[Step {t}] Top-5 important state dims: {np.argsort(-saliency)[:5]} {np.sort(-saliency)[:5]}")
-        # saliency_list.append(saliency)
+            logits = model.forward(timesteps[:,t-context_len+1:t+1],
+                                   states[:,t-context_len+1:t+1],
+                                   actions[:,t-context_len+1:t+1],
+                                   rewards_to_go[:,t-context_len+1:t+1],
+                                   prompts=prompts,)
+            idx = -1
+        act = torch.stack([l[:, idx].argmax(dim=-1) for l in logits], dim=-1).unsqueeze(1)
 
         obs, _, rewards, done, infos, _ = env.step(act.view(eval_batch_size, -1).cpu().numpy())
         running_reward = torch.tensor(rewards, dtype=torch.float32, device=device)
         # print(f"time: {infos['time']}, pc: {infos['pc']}, dp: {infos['drop_ratio']}, rwd: {infos['reward']}")
         # if t > 20:
         #     sys.exit()
-
-        obs_buffer.append(np.array(obs))
-        act_buffer.append(act.cpu().numpy())
-        rew_buffer.append(np.array(rewards))
 
         # add action in placeholder
         actions[:, t] = act.view(eval_batch_size, -1)
@@ -193,30 +128,6 @@ def evaluate_on_env(args, model, device, context_len, env, rtg_target, rtg_scale
         
         if done:
             break
-
-    # attn_mean = (attn_sum / count)[0]
-    # plot_attention_map(attn_mean, context_len=context_len, save_path="attn_mean.png")
-    # plot_and_save_saliency(saliency_list, save_dir=f"saliency_target")
-    trajectory = {
-            'observations': np.array(obs_buffer, dtype=np.float32),   # (T, 123)
-            'actions': np.array(act_buffer, dtype=np.float32),        # (T, 2)
-            'rewards': np.array(rew_buffer, dtype=np.float32),        # (T, 1)
-    }
-
-    save_dir = args.traj_save_path
-    os.makedirs(args.traj_save_path, exist_ok=True)
-    save_path = os.path.join(save_dir, f"1.pkl")
-
-    if os.path.exists(save_path):
-        with open(save_path, 'rb') as f:
-            data = pickle.load(f)
-    else:
-        data = []
-    
-    data.append(trajectory)
-    # with open(save_path, 'wb') as f:
-    #     pickle.dump(data, f)
-    # print(f"Trajectory saved to: {save_path}")
 
     results['eval/avg_pc'] = total_pc / steps
     results['eval/avg_drop_ratio'] = total_drop_ratio / steps
@@ -288,7 +199,8 @@ class TrajectoryDataset(Dataset):
         states = torch.from_numpy(obs[si:ei])
         actions = torch.from_numpy(acts[si:ei])
         returns_to_go = torch.from_numpy(rtgs[si:ei])
+        prompt = torch.tensor(traj["prompt"], dtype=torch.long)
 
         timesteps = torch.arange(start=si, end=ei, step=1)
 
-        return timesteps, states, actions, returns_to_go
+        return prompt, timesteps, states, actions, returns_to_go

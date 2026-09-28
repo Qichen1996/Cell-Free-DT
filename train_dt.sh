@@ -16,7 +16,7 @@ wandb_api_key="e4bee9a24174f0daabc173c5384733a60c1ea981"
 #     done
 # done
 
-for len in 1 3; do
+for len in 5; do
     for rtg in 1; do
     python train_dt.py --context_len ${len} --rtg_scale ${rtg} $@
     done
