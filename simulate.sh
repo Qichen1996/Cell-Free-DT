@@ -6,8 +6,8 @@ rtg_scale=1
 rtg=-15
 
 for seed in {1..5}; do
-#     ./simulate.py -S A --w_str 60 --w_sen 0 --w_tol 0 --w_pc 1 --seed $seed -a $acc --model_index 0 $@
-     ./simulate.py -S A --w_str 150 --w_sen 1.5 --w_tol 1.5 --w_pc 1 --seed $seed -a $acc --model_index 0 $@
+     ./simulate.py -S A --w_str 450 --w_sen 0.6 --w_tol 0.6 --w_qos 40 --w_xqos 0 --w_pc 1 --seed $seed -a $acc --model_dir "E:/PycharmProjects/Cell-Free-DT-new/results/DT/A/mappo/check/wandb/run-20261005_181208-3gfi58ge/files" --stats_dir analysis/sim_stats/A450 $@
+#     ./simulate.py -S C --w_str 50 --w_sen 0 --w_tol 0 --w_pc 2 --seed $seed -a $acc --model_index 0 $@
 #    ./simulate.py -S A --stochastic --w_str 200 --w_sen 15 --w_tol 0 --w_pc 0.1 --seed $seed -a $acc $@
 #     ./simulate.py -S A --w_str 100 --w_sen 2 --w_tol 2 --w_pc 1 --seed $seed -a $acc $@
 #     ./simulate.py -S B --w_str 300 --w_sen 2 --w_tol 0 --w_pc 0.6 --seed $seed -a $acc $@

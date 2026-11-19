@@ -1,0 +1,184 @@
+[
+  {
+    "pc": 0.6,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc0.6_trainseed2/final",
+    "tag": "pc0.6_trainseed2_final"
+  },
+  {
+    "pc": 0.9,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc0.9_trainseed2/final",
+    "tag": "pc0.9_trainseed2_final"
+  },
+  {
+    "pc": 0.6,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc0.6_trainseed3/final",
+    "tag": "pc0.6_trainseed3_final"
+  },
+  {
+    "pc": 0.9,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc0.9_trainseed3/final",
+    "tag": "pc0.9_trainseed3_final"
+  },
+  {
+    "pc": 1.2,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc1.2_trainseed2/final",
+    "tag": "pc1.2_trainseed2_final"
+  },
+  {
+    "pc": 1.2,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc1.2_trainseed3/final",
+    "tag": "pc1.2_trainseed3_final"
+  },
+  {
+    "pc": 1.5,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc1.5_trainseed2/final",
+    "tag": "pc1.5_trainseed2_final"
+  },
+  {
+    "pc": 1.5,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc1.5_trainseed3/final",
+    "tag": "pc1.5_trainseed3_final"
+  },
+  {
+    "pc": 1.8,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc1.8_trainseed2/final",
+    "tag": "pc1.8_trainseed2_final"
+  },
+  {
+    "pc": 1.8,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc1.8_trainseed3/final",
+    "tag": "pc1.8_trainseed3_final"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc2.1_trainseed2/final",
+    "tag": "pc2.1_trainseed2_final"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc2.1_trainseed3/final",
+    "tag": "pc2.1_trainseed3_final"
+  },
+  {
+    "pc": 2.4,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc2.4_trainseed2/final",
+    "tag": "pc2.4_trainseed2_final"
+  },
+  {
+    "pc": 2.4,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc2.4_trainseed3/final",
+    "tag": "pc2.4_trainseed3_final"
+  },
+  {
+    "pc": 2.7,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc2.7_trainseed2/final",
+    "tag": "pc2.7_trainseed2_final"
+  },
+  {
+    "pc": 2.7,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc2.7_trainseed3/final",
+    "tag": "pc2.7_trainseed3_final"
+  },
+  {
+    "pc": 3.0,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc3.0_trainseed2/final",
+    "tag": "pc3.0_trainseed2_final"
+  },
+  {
+    "pc": 3.0,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc3.0_trainseed3/final",
+    "tag": "pc3.0_trainseed3_final"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc3.3_trainseed2/final",
+    "tag": "pc3.3_trainseed2_final"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc3.3_trainseed3/final",
+    "tag": "pc3.3_trainseed3_final"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 2,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc3.6_trainseed2/final",
+    "tag": "pc3.6_trainseed2_final"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 3,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc3.6_trainseed3/final",
+    "tag": "pc3.6_trainseed3_final"
+  },
+  {
+    "pc": 1.8,
+    "training_seed": 4,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc1.8_trainseed4/final",
+    "tag": "pc1.8_trainseed4_final"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 4,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc2.1_trainseed4/final",
+    "tag": "pc2.1_trainseed4_final"
+  },
+  {
+    "pc": 1.8,
+    "training_seed": 5,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc1.8_trainseed5/final",
+    "tag": "pc1.8_trainseed5_final"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 5,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_all_fixed_final_models_eval/models/pc2.1_trainseed5/final",
+    "tag": "pc2.1_trainseed5_final"
+  }
+]

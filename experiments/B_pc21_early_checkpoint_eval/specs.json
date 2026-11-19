@@ -1,0 +1,65 @@
+[
+  {
+    "pc": 2.1,
+    "training_seed": 1,
+    "checkpoint": 140,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed1/eps140",
+    "tag": "pc2.1_trainseed1_cp140"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 1,
+    "checkpoint": 160,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed1/eps160",
+    "tag": "pc2.1_trainseed1_cp160"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 1,
+    "checkpoint": 190,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed1/eps190",
+    "tag": "pc2.1_trainseed1_cp190"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 2,
+    "checkpoint": 140,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed2/eps140",
+    "tag": "pc2.1_trainseed2_cp140"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 2,
+    "checkpoint": 160,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed2/eps160",
+    "tag": "pc2.1_trainseed2_cp160"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 2,
+    "checkpoint": 190,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed2/eps190",
+    "tag": "pc2.1_trainseed2_cp190"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 3,
+    "checkpoint": 140,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed3/eps140",
+    "tag": "pc2.1_trainseed3_cp140"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 3,
+    "checkpoint": 160,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed3/eps160",
+    "tag": "pc2.1_trainseed3_cp160"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 3,
+    "checkpoint": 190,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc21_early_checkpoint_eval/models/pc2.1_trainseed3/eps190",
+    "tag": "pc2.1_trainseed3_cp190"
+  }
+]

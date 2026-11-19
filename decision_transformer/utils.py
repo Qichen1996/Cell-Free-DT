@@ -35,6 +35,9 @@ def evaluate_on_env(args, model, device, context_len, env, rtg_target, rtg_scale
         device=device,
     )
 
+    if getattr(model, 'deployment_prompt', False):
+        prompts = torch.tensor([traffic_to_prompt[env.net.scenario], env.num_agents, env.net.area[0]], device=device).repeat(eval_batch_size, 1)
+
     results = {}
 
     state_dim = env.observation_space[0].shape[0]
@@ -84,7 +87,7 @@ def evaluate_on_env(args, model, device, context_len, env, rtg_target, rtg_scale
     running_rtg = torch.ones((eval_batch_size, 1), device=device) * (rtg_target / rtg_scale)
 
     total_pc = 0
-    total_drop_ratio = 0
+    total_drop_ratio = np.zeros(3, dtype=np.float64)
     steps = 0
 
     for t in trange(max_test_ep_len, file=sys.stdout):
@@ -123,26 +126,50 @@ def evaluate_on_env(args, model, device, context_len, env, rtg_target, rtg_scale
         actions[:, t] = act.view(eval_batch_size, -1)
 
         steps += 1
-        total_pc += infos['pc'] 
-        total_drop_ratio += infos['drop_ratio']
+        # Reward statistics are the same records exported to reward.csv.
+        # EVAL info_dict does not expose the legacy drop_ratio field.
+        reward_stats = env._reward_stats[-1]
+        total_pc += reward_stats['pc_kw']
+        total_drop_ratio += np.array([
+            reward_stats['str_drop'], reward_stats['sen_drop'],
+            reward_stats['tor_drop'],
+        ], dtype=np.float64)
         
         if done:
             break
 
-    results['eval/avg_pc'] = total_pc / steps
-    results['eval/avg_drop_ratio'] = total_drop_ratio / steps
+    results['eval/avg_pc_kw'] = total_pc / steps
+    for category, ratio in zip(('str', 'sen', 'tor'), total_drop_ratio / steps):
+        results[f'eval/avg_{category}_drop_ratio'] = float(ratio)
 
     return results
 
 
 class TrajectoryDataset(Dataset):
-    def __init__(self, dataset_path, context_len, rtg_scale=1.0):
+    def __init__(self, dataset_path, context_len, rtg_scale=1.0, seed_fraction=1.0, single_ap=False):
 
         self.context_len = context_len
 
         # load dataset
-        with open(dataset_path, 'rb') as f:
-            self.trajectories = pickle.load(f)
+        paths = dataset_path if isinstance(dataset_path, (list, tuple)) else [dataset_path]
+        if not 0 < seed_fraction <= 1:
+            raise ValueError('seed_fraction must be in (0, 1]')
+        self.trajectories = []
+        # Older local exports may use NumPy 2 module paths on NumPy 1 runtimes.
+        import sys
+        import numpy.core.numeric
+        import numpy.core.multiarray
+        sys.modules.setdefault('numpy._core.numeric', numpy.core.numeric)
+        sys.modules.setdefault('numpy._core.multiarray', numpy.core.multiarray)
+        for path in paths:
+            from trajectory_io import load_trajectory_pickle
+            items = load_trajectory_pickle(path)
+            keep = max(1, int(len(items) * seed_fraction))
+            print('DATA_SELECTION', path, 'selected', keep, 'of', len(items), flush=True)
+            self.trajectories.extend(items[:keep])
+        self.single_ap = single_ap
+        self.window_ends = []
+        self.window_counts = []
 
         self.windows = []
         for ti, traj in enumerate(self.trajectories):
@@ -150,8 +177,9 @@ class TrajectoryDataset(Dataset):
             traj['returns_to_go'] = discount_cumsum(traj['rewards'], 1.0) / rtg_scale
             T = traj['observations'].shape[0]
             assert T >= self.context_len, "trajectory too short"
-            for si in range(0, T - self.context_len + 1, 1):
-                self.windows.append((ti, si))
+            count = T - self.context_len + 1
+            self.window_counts.append(count)
+            self.window_ends.append((self.window_ends[-1] if self.window_ends else 0) + count * (traj['observations'].shape[1] if single_ap else 1))
 
     def get_state_stats(self):
         # state_means = []
@@ -185,10 +213,13 @@ class TrajectoryDataset(Dataset):
         return self.state_mean, self.state_std
 
     def __len__(self):
-        return len(self.windows)
+        return self.window_ends[-1]
 
     def __getitem__(self, idx):
-        traj_idx, si = self.windows[idx]
+        import bisect
+        traj_idx = bisect.bisect_right(self.window_ends, idx)
+        offset = idx - (self.window_ends[traj_idx-1] if traj_idx else 0)
+        ap, si = divmod(offset, self.window_counts[traj_idx])
         traj = self.trajectories[traj_idx]
         ei = si + self.context_len
 
@@ -199,6 +230,10 @@ class TrajectoryDataset(Dataset):
         states = torch.from_numpy(obs[si:ei])
         actions = torch.from_numpy(acts[si:ei])
         returns_to_go = torch.from_numpy(rtgs[si:ei])
+        if self.single_ap:
+            states = states[:, ap:ap+1]
+            actions = actions[:, ap:ap+1]
+            returns_to_go = returns_to_go[:, ap:ap+1]
         prompt = torch.tensor(traj["prompt"], dtype=torch.long)
 
         timesteps = torch.arange(start=si, end=ei, step=1)

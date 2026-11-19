@@ -1,0 +1,202 @@
+[
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 0.6,
+    "tag": "refresh150/pc0.6",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc0.6/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc0.6/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 0.9,
+    "tag": "refresh150/pc0.9",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc0.9/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc0.9/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 1.2,
+    "tag": "refresh150/pc1.2",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc1.2/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc1.2/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 1.5,
+    "tag": "refresh150/pc1.5",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc1.5/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc1.5/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 1.8,
+    "tag": "refresh150/pc1.8",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/baseline/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc1.8/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 2.1,
+    "tag": "refresh150/pc2.1",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc2.1/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc2.1/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 2.4,
+    "tag": "refresh150/pc2.4",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc2.4/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc2.4/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 2.7,
+    "tag": "refresh150/pc2.7",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc2.7/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc2.7/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 3.0,
+    "tag": "refresh150/pc3.0",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc3.0/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc3.0/A/A"
+  },
+  {
+    "model": "refresh150",
+    "env": "A",
+    "pc": 3.3,
+    "tag": "refresh150/pc3.3",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/refresh150/model.pt",
+    "sha": "bf4dd6575b1ebd6c600915fb33f65027665a8256cd79e3e1c598dda53da30f39",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Brefresh150_seven_prompt_v1/pc3.3/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/refresh150/pc3.3/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 0.6,
+    "tag": "single200/pc0.6",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc0.6/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc0.6/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 0.9,
+    "tag": "single200/pc0.9",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc0.9/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc0.9/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 1.2,
+    "tag": "single200/pc1.2",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc1.2/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc1.2/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 1.5,
+    "tag": "single200/pc1.5",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc1.5/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc1.5/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 1.8,
+    "tag": "single200/pc1.8",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc1.8/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc1.8/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 2.1,
+    "tag": "single200/pc2.1",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc2.1/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc2.1/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 2.4,
+    "tag": "single200/pc2.4",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc2.4/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc2.4/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 2.7,
+    "tag": "single200/pc2.7",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc2.7/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc2.7/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 3.0,
+    "tag": "single200/pc3.0",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc3.0/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc3.0/A/A"
+  },
+  {
+    "model": "single200",
+    "env": "A",
+    "pc": 3.3,
+    "tag": "single200/pc3.3",
+    "model_path": "/workspace/Cell-Free-DT-new/experiments/PDT_refresh150_single200_A_seed20_v1/models/single200/model.pt",
+    "sha": "00c227342a337f9239a3572e387b1cd7696e084cfede9acc443d04bd6a190514",
+    "reused_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_Bsingle200_prompt_ABC_v1/pc3.3/A/A",
+    "reused_seed6to20_root": "/workspace/Cell-Free-DT-new/analysis/sim_stats/PDT_refresh150_single200_A_seed20_v1/single200/pc3.3/A/A"
+  }
+]

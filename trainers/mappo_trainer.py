@@ -455,9 +455,7 @@ class MappoTrainer(BaseTrainer):
 
         for episode in pbar:
             if self.use_linear_lr_decay:
-                self.policy.lr_decay(episode, episodes)
-            # self.lr_decay(episode, episodes)
-
+                self.lr_decay(episode, episodes)
             for step in trange(self.episode_length, file=sys.stdout, postfix='collecting'):
                 # sample actions
                 values, actions, action_log_probs, rnn_states, rnn_states_critic = self.sample(step)

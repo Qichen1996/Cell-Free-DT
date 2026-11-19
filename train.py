@@ -115,7 +115,7 @@ def main(args):
 
     # logging
     if args.use_wandb:
-        wandb.login(key="e4bee9a24174f0daabc173c5384733a60c1ea981")
+        wandb.login(key=os.environ.get("WANDB_API_KEY"))
         wandb.init(
             config=args,
             project=args.env_name,

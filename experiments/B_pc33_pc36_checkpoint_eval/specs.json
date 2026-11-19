@@ -1,0 +1,212 @@
+[
+  {
+    "pc": 3.3,
+    "training_seed": 1,
+    "checkpoint": 180,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed1/eps180",
+    "tag": "pc3.3_trainseed1_cp180"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 1,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed1/eps200",
+    "tag": "pc3.3_trainseed1_cp200"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 1,
+    "checkpoint": 220,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed1/eps220",
+    "tag": "pc3.3_trainseed1_cp220"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 1,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed1/eps230",
+    "tag": "pc3.3_trainseed1_cp230"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 1,
+    "checkpoint": 240,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed1/eps240",
+    "tag": "pc3.3_trainseed1_cp240"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 2,
+    "checkpoint": 180,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed2/eps180",
+    "tag": "pc3.3_trainseed2_cp180"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 2,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed2/eps200",
+    "tag": "pc3.3_trainseed2_cp200"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 2,
+    "checkpoint": 220,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed2/eps220",
+    "tag": "pc3.3_trainseed2_cp220"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 2,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed2/eps230",
+    "tag": "pc3.3_trainseed2_cp230"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 2,
+    "checkpoint": 240,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed2/eps240",
+    "tag": "pc3.3_trainseed2_cp240"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 3,
+    "checkpoint": 180,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed3/eps180",
+    "tag": "pc3.3_trainseed3_cp180"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 3,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed3/eps200",
+    "tag": "pc3.3_trainseed3_cp200"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 3,
+    "checkpoint": 220,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed3/eps220",
+    "tag": "pc3.3_trainseed3_cp220"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 3,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed3/eps230",
+    "tag": "pc3.3_trainseed3_cp230"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 3,
+    "checkpoint": 240,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.3_trainseed3/eps240",
+    "tag": "pc3.3_trainseed3_cp240"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 1,
+    "checkpoint": 180,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed1/eps180",
+    "tag": "pc3.6_trainseed1_cp180"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 1,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed1/eps200",
+    "tag": "pc3.6_trainseed1_cp200"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 1,
+    "checkpoint": 220,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed1/eps220",
+    "tag": "pc3.6_trainseed1_cp220"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 1,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed1/eps230",
+    "tag": "pc3.6_trainseed1_cp230"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 1,
+    "checkpoint": 240,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed1/eps240",
+    "tag": "pc3.6_trainseed1_cp240"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 2,
+    "checkpoint": 180,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed2/eps180",
+    "tag": "pc3.6_trainseed2_cp180"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 2,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed2/eps200",
+    "tag": "pc3.6_trainseed2_cp200"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 2,
+    "checkpoint": 220,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed2/eps220",
+    "tag": "pc3.6_trainseed2_cp220"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 2,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed2/eps230",
+    "tag": "pc3.6_trainseed2_cp230"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 2,
+    "checkpoint": 240,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed2/eps240",
+    "tag": "pc3.6_trainseed2_cp240"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 3,
+    "checkpoint": 180,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed3/eps180",
+    "tag": "pc3.6_trainseed3_cp180"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 3,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed3/eps200",
+    "tag": "pc3.6_trainseed3_cp200"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 3,
+    "checkpoint": 220,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed3/eps220",
+    "tag": "pc3.6_trainseed3_cp220"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 3,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed3/eps230",
+    "tag": "pc3.6_trainseed3_cp230"
+  },
+  {
+    "pc": 3.6,
+    "training_seed": 3,
+    "checkpoint": 240,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc33_pc36_checkpoint_eval/models/pc3.6_trainseed3/eps240",
+    "tag": "pc3.6_trainseed3_cp240"
+  }
+]

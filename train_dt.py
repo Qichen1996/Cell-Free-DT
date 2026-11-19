@@ -34,7 +34,10 @@ def train(args, env_args):
     dropout_p = args.dropout_p          # dropout probability
 
     # load data from this file
-    dataset_path = f'{args.dataset_dir}/ab.pkl'
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    torch.set_num_threads(5)
+    dataset_path = args.dataset_files or [f'{args.dataset_dir}/ab.pkl']
 
     # saves model and csv in this directory
     log_dir = args.log_dir
@@ -63,16 +66,19 @@ def train(args, env_args):
     print("=" * 60)
 
     print("device set to: " + str(device))
-    print("dataset path: " + dataset_path)
+    print("dataset path: " + str(dataset_path))
     print("model save path: " + save_model_path)
     print("log csv save path: " + log_csv_path)
 
-    traj_dataset = TrajectoryDataset(dataset_path, context_len, rtg_scale)
+    traj_dataset = TrajectoryDataset(dataset_path, context_len, rtg_scale,
+                                     seed_fraction=args.seed_fraction, single_ap=args.single_ap)
     # subset = Subset(traj_dataset, [0])
     traj_data_loader = DataLoader(
                             traj_dataset,
                             batch_size=batch_size,
-                            shuffle=True
+                            shuffle=True,
+                            num_workers=args.num_workers,
+                            pin_memory=True
                         )
 
     data_iter = iter(traj_data_loader)
@@ -89,7 +95,9 @@ def train(args, env_args):
         context_len=context_len,
         n_heads=n_heads,
         drop_p=dropout_p,
-        max_timestep=10080
+        max_timestep=10080,
+        deployment_prompt=args.deployment_prompt,
+        no_prompt=args.no_prompt
     ).to(device)
 
     if use_norm:
@@ -144,7 +152,11 @@ def train(args, env_args):
             actions_flat = actions.permute(0, 2, 1, 3).reshape(B * N, T, act_dim)
             returns_to_go_flat = returns_to_go.permute(0, 2, 1, 3).reshape(B * N, T, 1)
             timesteps_flat = timesteps.unsqueeze(1).expand(B, N, T).reshape(B * N, T)
-            prompts_flat = prompts[:, None].expand(B, N).reshape(B * N)
+            if args.deployment_prompt:
+                prompts_flat = prompts[:, None, :].expand(B, N, 3).reshape(B*N, 3)
+            else:
+                scenario_prompts = prompts[:, 0] if prompts.ndim == 2 else prompts
+                prompts_flat = scenario_prompts[:, None].expand(B, N).reshape(B*N)
 
             action_logits = model.forward(
                                                     timesteps=timesteps_flat,
@@ -211,6 +223,7 @@ def train(args, env_args):
         torch.save({
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
+            'args': vars(args),
         }, save_model_path)
 
     with open(log_csv_path, 'w', newline='') as f:
@@ -239,6 +252,12 @@ if __name__ == "__main__":
     parser.add_argument('--norm', action='store_true')
 
     parser.add_argument('--dataset_dir', type=str, default='analysis/trajectory')
+    parser.add_argument('--dataset_files', nargs='+')
+    parser.add_argument('--seed_fraction', type=float, default=1.0)
+    parser.add_argument('--single_ap', action='store_true')
+    parser.add_argument('--deployment_prompt', action='store_true')
+    parser.add_argument('--no_prompt', action='store_true', help='ordinary DT without any prompt token')
+    parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--log_dir', type=str, default='dt_results/')
 
     parser.add_argument('--context_len', type=int, default=10)

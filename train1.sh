@@ -32,7 +32,7 @@ w_pc=0.5
 log_interval=1
 
 wandb_user="qichenw"
-wandb_api_key="e4bee9a24174f0daabc173c5384733a60c1ea981"
+wandb_api_key="${WANDB_API_KEY:?set WANDB_API_KEY}"
 
 for seed in `seq ${seed_max}`;
 do

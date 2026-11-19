@@ -1,0 +1,422 @@
+[
+  {
+    "pc": 0.6,
+    "training_seed": 1,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc0.6_trainseed1_cp230",
+    "actor_sha256": "1b71c15079036a20e950c6342ae95839fc3399b7dc0e355a937a58a36d94c53c",
+    "manifest": {
+      "actor.pt": "1b71c15079036a20e950c6342ae95839fc3399b7dc0e355a937a58a36d94c53c",
+      "critic.pt": "5f06543c8cec6d06fd72281b26145484336e91fca1541cece8a3eabbb2c8b9ce",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc0.6_trainseed1_cp230"
+  },
+  {
+    "pc": 0.6,
+    "training_seed": 2,
+    "checkpoint": 180,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc0.6_trainseed2_cp180",
+    "manifest": {
+      "actor.pt": "18f89fc188db2ea39e200dbb39fbf10a10aadc3192257a338084b717af29902f",
+      "critic.pt": "73ddeb7212d21d39f1c7cf07aa9ce406bbe2130c52fbb9193ecbb4c1c7c80af9",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc0.6_trainseed2_cp180"
+  },
+  {
+    "pc": 0.6,
+    "training_seed": 3,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc0.6_trainseed3_cp200",
+    "manifest": {
+      "actor.pt": "35c653152f9f9c49ea55b808a43646b15a09fa40e59bce9d8773297e421813a2",
+      "critic.pt": "90df7d2a57d1d3cf07ce4a3398e8bc3edb8e08bf76d0ae98709fbdbd510b6e44",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc0.6_trainseed3_cp200"
+  },
+  {
+    "pc": 0.9,
+    "training_seed": 1,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc0.9_trainseed1_cp230",
+    "actor_sha256": "67a31d28a3bd68c672d5a687730fb788a477f18347ae963624019f048f18bc52",
+    "manifest": {
+      "actor.pt": "67a31d28a3bd68c672d5a687730fb788a477f18347ae963624019f048f18bc52",
+      "critic.pt": "c397aa8d8de80db3c56584612bbac31d846d6b2ad1036aab1cb4e86961234e50",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc0.9_trainseed1_cp230"
+  },
+  {
+    "pc": 0.9,
+    "training_seed": 2,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc0.9_trainseed2_cp200",
+    "manifest": {
+      "actor.pt": "239bbb7d227bf82f6dfe31aea98a73fdcac6f8ea23a82e155dc39ce474d551cf",
+      "critic.pt": "77ccf20f9cfb20f4990d6de4806020b22118c9425806c724ed78be886d16c567",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc0.9_trainseed2_cp200"
+  },
+  {
+    "pc": 0.9,
+    "training_seed": 3,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc0.9_trainseed3_cp230",
+    "manifest": {
+      "actor.pt": "2a8881369ae03de1ec670a0ca43b6f2f049df765f1bb43f4d108e31620e1998e",
+      "critic.pt": "d33434f025b66b130f365be141c1046f18bdacaffcf952f07c0569c3035c96df",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc0.9_trainseed3_cp230"
+  },
+  {
+    "pc": 1.2,
+    "training_seed": 1,
+    "checkpoint": 230,
+    "actor_sha256": "c4694ec3586912413bd32327b9cb2cde2034f38005d455233fef4a45f2e8b86b",
+    "critic_sha256": "d255f0b7b62d65dc3764f7b495e32df78a5ed7170d328d5622d528a75d7d0950",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_pc12_pc15_seeds23_checkpoint_eval/pc1.2_trainseed1_cp230/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.2_trainseed1_cp230",
+    "manifest": {
+      "actor.pt": "c4694ec3586912413bd32327b9cb2cde2034f38005d455233fef4a45f2e8b86b",
+      "critic.pt": "d255f0b7b62d65dc3764f7b495e32df78a5ed7170d328d5622d528a75d7d0950",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc1.2_trainseed1_cp230"
+  },
+  {
+    "pc": 1.2,
+    "training_seed": 2,
+    "checkpoint": 240,
+    "actor_sha256": "e33e0d62091fbe0efa9687e2f1ebc2233f2867db87f802e3eadad3fb8d048a81",
+    "critic_sha256": "846cccc30d619cb93d5ecdcbcd853c3659e7b183eee25ef07699947ce5a23e3a",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_pc12_pc15_seeds23_checkpoint_eval/pc1.2_trainseed2_cp240/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.2_trainseed2_cp240",
+    "manifest": {
+      "actor.pt": "e33e0d62091fbe0efa9687e2f1ebc2233f2867db87f802e3eadad3fb8d048a81",
+      "critic.pt": "846cccc30d619cb93d5ecdcbcd853c3659e7b183eee25ef07699947ce5a23e3a",
+      "architecture.json": "73e0b2db1895fd75c1e42d58e44fcd5c7a32393f4858ae152ea35ee8046f4b2d"
+    },
+    "tag": "pc1.2_trainseed2_cp240"
+  },
+  {
+    "pc": 1.2,
+    "training_seed": 3,
+    "checkpoint": 200,
+    "actor_sha256": "14cb8a2a8c332cac451cba412f7f5665cd7f7c5dde9d69bfaf5bd1b52be49d28",
+    "critic_sha256": "1245b5630e27f3c5ad16dacbe203d7157160b9afc56eb971023f730049d5a1ad",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_pc12_pc15_seeds23_checkpoint_eval/pc1.2_trainseed3_cp200/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.2_trainseed3_cp200",
+    "manifest": {
+      "actor.pt": "14cb8a2a8c332cac451cba412f7f5665cd7f7c5dde9d69bfaf5bd1b52be49d28",
+      "critic.pt": "1245b5630e27f3c5ad16dacbe203d7157160b9afc56eb971023f730049d5a1ad",
+      "architecture.json": "73e0b2db1895fd75c1e42d58e44fcd5c7a32393f4858ae152ea35ee8046f4b2d"
+    },
+    "tag": "pc1.2_trainseed3_cp200"
+  },
+  {
+    "pc": 1.5,
+    "training_seed": 1,
+    "checkpoint": 230,
+    "actor_sha256": "3e308e2a55abf06a55fdf5b226d061d4dd3bc8463ee25d2e511d526a3dffb360",
+    "critic_sha256": "3cef090dec9ad590d629181731f3f2956e4385cdfdf2de063b91bdd943918078",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_pc12_pc15_seeds23_checkpoint_eval/pc1.5_trainseed1_cp230/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.5_trainseed1_cp230",
+    "manifest": {
+      "actor.pt": "3e308e2a55abf06a55fdf5b226d061d4dd3bc8463ee25d2e511d526a3dffb360",
+      "critic.pt": "3cef090dec9ad590d629181731f3f2956e4385cdfdf2de063b91bdd943918078",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc1.5_trainseed1_cp230"
+  },
+  {
+    "pc": 1.5,
+    "training_seed": 2,
+    "checkpoint": 220,
+    "actor_sha256": "805a587d0219ae49b830bf2cdd563c6e031c243bff7f2c8058f296e060d47d9c",
+    "critic_sha256": "888a374b56d100e115e262ad59e1e0c9a0864b0eef6400203d214e671461550d",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_pc12_pc15_seeds23_checkpoint_eval/pc1.5_trainseed2_cp220/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.5_trainseed2_cp220",
+    "manifest": {
+      "actor.pt": "805a587d0219ae49b830bf2cdd563c6e031c243bff7f2c8058f296e060d47d9c",
+      "critic.pt": "888a374b56d100e115e262ad59e1e0c9a0864b0eef6400203d214e671461550d",
+      "architecture.json": "73e0b2db1895fd75c1e42d58e44fcd5c7a32393f4858ae152ea35ee8046f4b2d"
+    },
+    "tag": "pc1.5_trainseed2_cp220"
+  },
+  {
+    "pc": 1.5,
+    "training_seed": 3,
+    "checkpoint": 200,
+    "actor_sha256": "37af38272f402e00e654737c9465f633b6efeb4c836825ae5518e0a49ccbdd77",
+    "critic_sha256": "f95d1476fb0608042848c7200305e24d8a83a9ef443e6eb890ed8ed934fcf440",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_pc12_pc15_seeds23_checkpoint_eval/pc1.5_trainseed3_cp200/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.5_trainseed3_cp200",
+    "manifest": {
+      "actor.pt": "37af38272f402e00e654737c9465f633b6efeb4c836825ae5518e0a49ccbdd77",
+      "critic.pt": "f95d1476fb0608042848c7200305e24d8a83a9ef443e6eb890ed8ed934fcf440",
+      "architecture.json": "73e0b2db1895fd75c1e42d58e44fcd5c7a32393f4858ae152ea35ee8046f4b2d"
+    },
+    "tag": "pc1.5_trainseed3_cp200"
+  },
+  {
+    "pc": 1.8,
+    "training_seed": 1,
+    "checkpoint": 230,
+    "actor_sha256": "f9561880b46706fd583b2e64b501c23ebdbb9b4e0349c0a3785ace4e830a4cd5",
+    "critic_sha256": "c65e07ce75adc296a1dd0bd3776987056c1f359d9f65cff57562f90a0b8c732a",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc1.8_trainseed1_cp230/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.8_trainseed1_cp230",
+    "manifest": {
+      "actor.pt": "f9561880b46706fd583b2e64b501c23ebdbb9b4e0349c0a3785ace4e830a4cd5",
+      "critic.pt": "c65e07ce75adc296a1dd0bd3776987056c1f359d9f65cff57562f90a0b8c732a",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc1.8_trainseed1_cp230"
+  },
+  {
+    "pc": 1.8,
+    "training_seed": 2,
+    "checkpoint": 230,
+    "actor_sha256": "43f339c9cc30f67622b006b72fe5107f01131d0793e2198bf787a7d5919ce52a",
+    "critic_sha256": "f29638730f410557d335e201f48e167baec5e1ae5e4b1e50a2bd074bffb5fb5c",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc1.8_trainseed2_cp230/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.8_trainseed2_cp230",
+    "manifest": {
+      "actor.pt": "43f339c9cc30f67622b006b72fe5107f01131d0793e2198bf787a7d5919ce52a",
+      "critic.pt": "f29638730f410557d335e201f48e167baec5e1ae5e4b1e50a2bd074bffb5fb5c",
+      "architecture.json": "73e0b2db1895fd75c1e42d58e44fcd5c7a32393f4858ae152ea35ee8046f4b2d"
+    },
+    "tag": "pc1.8_trainseed2_cp230"
+  },
+  {
+    "pc": 1.8,
+    "training_seed": 3,
+    "checkpoint": 180,
+    "actor_sha256": "6c4369f02e217abe6c71c84bc7711c46bf7872144f42f8fca6da5362532d196a",
+    "critic_sha256": "cf8b0a7cc7cd3c3a1382999641490ed8aba2767bf1127a3b34e2f3b821b12ecc",
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc1.8_trainseed3_cp180/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc1.8_trainseed3_cp180",
+    "manifest": {
+      "actor.pt": "6c4369f02e217abe6c71c84bc7711c46bf7872144f42f8fca6da5362532d196a",
+      "critic.pt": "cf8b0a7cc7cd3c3a1382999641490ed8aba2767bf1127a3b34e2f3b821b12ecc",
+      "architecture.json": "73e0b2db1895fd75c1e42d58e44fcd5c7a32393f4858ae152ea35ee8046f4b2d"
+    },
+    "tag": "pc1.8_trainseed3_cp180"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 1,
+    "checkpoint": 230,
+    "actor_sha256": "d032527ab09062ac100447d187f20d6e262d4d5a15e803421d69f290a3f7d9bb",
+    "critic_sha256": "1e225233bc5950be979aec46a64841d9824d06c3710c19e9fc6d95528eeba7d5",
+    "existing_B_paths": [
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed1_cp230/B/B/SEED1",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed1_cp230/B/B/SEED2",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed1_cp230/B/B/SEED3",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed1_cp230/B/B/SEED4",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed1_cp230/B/B/SEED5"
+    ],
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed1_cp230/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.1_trainseed1_cp230",
+    "manifest": {
+      "actor.pt": "d032527ab09062ac100447d187f20d6e262d4d5a15e803421d69f290a3f7d9bb",
+      "critic.pt": "1e225233bc5950be979aec46a64841d9824d06c3710c19e9fc6d95528eeba7d5",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc2.1_trainseed1_cp230"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 2,
+    "checkpoint": 220,
+    "actor_sha256": "2992ebd4f9da458955bcde4c355924ccac81e68d0a84e300d79388ea50b4f23b",
+    "critic_sha256": "ff6b20d146d1e1fde9f8248bbb3b80d0604362cf83a1f1797a355d92956147a4",
+    "existing_B_paths": [
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed2_cp220/B/B/SEED1",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed2_cp220/B/B/SEED2",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed2_cp220/B/B/SEED3",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed2_cp220/B/B/SEED4",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed2_cp220/B/B/SEED5"
+    ],
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed2_cp220/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.1_trainseed2_cp220",
+    "manifest": {
+      "actor.pt": "2992ebd4f9da458955bcde4c355924ccac81e68d0a84e300d79388ea50b4f23b",
+      "critic.pt": "ff6b20d146d1e1fde9f8248bbb3b80d0604362cf83a1f1797a355d92956147a4",
+      "architecture.json": "73e0b2db1895fd75c1e42d58e44fcd5c7a32393f4858ae152ea35ee8046f4b2d"
+    },
+    "tag": "pc2.1_trainseed2_cp220"
+  },
+  {
+    "pc": 2.1,
+    "training_seed": 3,
+    "checkpoint": 200,
+    "actor_sha256": "e58a435bf8f9adca4dc9f7c64461203632ee244aebfdeef490ef661e83824213",
+    "critic_sha256": "07dbe03b3133a97299e30504003e69ff5aed6760f77d71fac218e7b929f7c323",
+    "existing_B_paths": [
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed3_cp200/B/B/SEED1",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed3_cp200/B/B/SEED2",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed3_cp200/B/B/SEED3",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed3_cp200/B/B/SEED4",
+      "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed3_cp200/B/B/SEED5"
+    ],
+    "verified_path": "/workspace/Cell-Free-DT-new/analysis/sim_stats/B_lowpc_seed1to5/pc2.1_trainseed3_cp200/B/B/SEED1",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.1_trainseed3_cp200",
+    "manifest": {
+      "actor.pt": "e58a435bf8f9adca4dc9f7c64461203632ee244aebfdeef490ef661e83824213",
+      "critic.pt": "07dbe03b3133a97299e30504003e69ff5aed6760f77d71fac218e7b929f7c323",
+      "architecture.json": "73e0b2db1895fd75c1e42d58e44fcd5c7a32393f4858ae152ea35ee8046f4b2d"
+    },
+    "tag": "pc2.1_trainseed3_cp200"
+  },
+  {
+    "pc": 2.4,
+    "training_seed": 1,
+    "checkpoint": 220,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.4_trainseed1_cp220",
+    "manifest": {
+      "actor.pt": "111cec40c44c5a86e47b40d67e85f8629d189b6d290e65665c8311e33e161c7b",
+      "critic.pt": "0d4d5694e945739b6011a029f8c60558267740c9c2df01d6677226d105015b4c",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc2.4_trainseed1_cp220"
+  },
+  {
+    "pc": 2.4,
+    "training_seed": 2,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.4_trainseed2_cp230",
+    "manifest": {
+      "actor.pt": "6743a8d5d04ba099991e0d1676d96b44bd56e844751cb24d21091ed1a6688be0",
+      "critic.pt": "7ad41b61eee39c29e18bc0d63006c425f6f9dcd5cae08d1821802cc15623c4ef",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc2.4_trainseed2_cp230"
+  },
+  {
+    "pc": 2.4,
+    "training_seed": 3,
+    "checkpoint": 240,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.4_trainseed3_cp240",
+    "manifest": {
+      "actor.pt": "c710554cd0d8ae2d87c61606ce115e367b4fd03b03834be548e4f375a1f49051",
+      "critic.pt": "7d043ab39d4c356fc8887d12550afb3a5ecfdc90555419d28558b7e5fff615d6",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc2.4_trainseed3_cp240"
+  },
+  {
+    "pc": 2.7,
+    "training_seed": 1,
+    "checkpoint": "final",
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.7_trainseed1_cpfinal",
+    "actor_sha256": "3dbad535ee3f6bf239ad83f98d8c15aac47007fbee162e6f33ab80aacd874a98",
+    "manifest": {
+      "actor.pt": "3dbad535ee3f6bf239ad83f98d8c15aac47007fbee162e6f33ab80aacd874a98",
+      "critic.pt": "170eee46c23d8637edb98d8324fbf26981bd8fcb4ad1cb7b7fc57031a20f7a72",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc2.7_trainseed1_cpfinal"
+  },
+  {
+    "pc": 2.7,
+    "training_seed": 2,
+    "checkpoint": 220,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.7_trainseed2_cp220",
+    "manifest": {
+      "actor.pt": "6fbbc004b2de8c9b3394a053b3fdcea4cf5a8be005ba5f137f926bed44478556",
+      "critic.pt": "fe8f8ebc614dbeee664582e0dc2c72f0addcefbf75221a9016d18bc91ab69044",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc2.7_trainseed2_cp220"
+  },
+  {
+    "pc": 2.7,
+    "training_seed": 3,
+    "checkpoint": 240,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc2.7_trainseed3_cp240",
+    "manifest": {
+      "actor.pt": "7330926a2696338f5bbee3c14d20fe561994bd242d77b948f2f5b1acec86fd8a",
+      "critic.pt": "228568f6fccf1d57222c2d2a46f22054ef5c22601378176684451e10e138aaf4",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc2.7_trainseed3_cp240"
+  },
+  {
+    "pc": 3.0,
+    "training_seed": 1,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc3.0_trainseed1_cp200",
+    "manifest": {
+      "actor.pt": "e9cf6dbdae7fe2b850a21526663423fba855bb3ad1d11c2d641d18254d1510b8",
+      "critic.pt": "b80df14aee4c00f0c4f19f58fbde173a2199fa31b880c28e22129c1d4eb0dde4",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc3.0_trainseed1_cp200"
+  },
+  {
+    "pc": 3.0,
+    "training_seed": 2,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc3.0_trainseed2_cp230",
+    "manifest": {
+      "actor.pt": "9f5e58276a0ed0f78b516c56d520d2893d3be6ab3c0814d9de3a7d4b71d03d28",
+      "critic.pt": "17eb3e6db81b8c46b0610dc422653c4585a31bf5a3a6bc97fca48c98a36a6118",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc3.0_trainseed2_cp230"
+  },
+  {
+    "pc": 3.0,
+    "training_seed": 3,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc3.0_trainseed3_cp200",
+    "manifest": {
+      "actor.pt": "1afc9404602d209a2a80e54a981c3094b4cac8a15b9d02abbde7cb14c748bdb2",
+      "critic.pt": "53f01e6694212e3ed30ead6ea3383dee70118ade25db5991e6005fcc28c3dc85",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc3.0_trainseed3_cp200"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 1,
+    "checkpoint": 200,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc3.3_trainseed1_cp200",
+    "manifest": {
+      "actor.pt": "33803f79373817e6fcbb933b3b7f980153df89198f0c044e28325b2e460065c4",
+      "critic.pt": "b950257a6d8fdd8856055e749d038d899ed3b00935ba4cfad5b9cc5bc1f400c0",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc3.3_trainseed1_cp200"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 2,
+    "checkpoint": 230,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc3.3_trainseed2_cp230",
+    "manifest": {
+      "actor.pt": "249cdeda81f2f164077e493f4daa945948ec42d17f3de371d44d223476f2699b",
+      "critic.pt": "4a685ba29e0d6113fe5f852351210ba55e38a5645edaa30c0fba14959b91a6c3",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc3.3_trainseed2_cp230"
+  },
+  {
+    "pc": 3.3,
+    "training_seed": 3,
+    "checkpoint": 180,
+    "source": "/workspace/Cell-Free-DT-new/experiments/tradeoff_selected123_collect_cross/models/pc3.3_trainseed3_cp180",
+    "manifest": {
+      "actor.pt": "775bd62bf02b5a642b101b92415b31a65fbc64fcee157c73d2495ae3d29df3c4",
+      "critic.pt": "c0260d8ce6d7951bf7ce7cefed589678ff1bea2c5249fb1a0a05a33d50378ebc",
+      "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+    },
+    "tag": "pc3.3_trainseed3_cp180"
+  }
+]

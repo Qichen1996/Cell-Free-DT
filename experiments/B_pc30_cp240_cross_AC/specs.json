@@ -1,0 +1,26 @@
+[
+  {
+    "training_seed": 1,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc30_cp240_cross_AC/models/trainseed1/eps240",
+    "manifest": {
+      "actor.pt": "b01fd8e5931cf73d54abaf6a7c8478b276fa3c0c419a7602414ca0b2e30cc258",
+      "critic.pt": "f162211baf71fde9492496c5f0c24ddca35da54506f0ac3df4a5e37235fa4420"
+    }
+  },
+  {
+    "training_seed": 2,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc30_cp240_cross_AC/models/trainseed2/eps240",
+    "manifest": {
+      "actor.pt": "af943c02379af185b0c927b41169bf6a596ba2521f019921f11cf5b584c419e3",
+      "critic.pt": "e70fd5410c0b0b6904b0bce82c5dc270837db84612d3cda54064c8e89e57579f"
+    }
+  },
+  {
+    "training_seed": 3,
+    "source": "/workspace/Cell-Free-DT-new/experiments/B_pc30_cp240_cross_AC/models/trainseed3/eps240",
+    "manifest": {
+      "actor.pt": "68e16af7bd92384eec8229dc9665ac191208c7fe892dce8e75b0f9614640deb6",
+      "critic.pt": "0a7a7fd5ca616c949129e872633bdb08565c0c9a126e65e84e6efa470d079027"
+    }
+  }
+]

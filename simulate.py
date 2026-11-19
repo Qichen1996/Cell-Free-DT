@@ -34,6 +34,9 @@ parser.add_argument("--model_index", type=int, default=0,
                           "by modification time (0 is the newest; default: 0)"))
 parser.add_argument("--traj_save_path", default="analysis/trajectory",
                     help="path to save trajectory")
+parser.add_argument("--traj_name", default=None,
+                    help=("trajectory file name (without .pkl) under traj_save_path; "
+                          "default: <scenario>_<numBS>bs_<area side>m, e.g. B_25bs_1000m"))
 
 parser.add_argument('--dataset_dir', type=str, default='analysis/trajectory')
 parser.add_argument('--norm', action='store_true')
@@ -46,6 +49,7 @@ parser.add_argument('--embed_dim', type=int, default=128)
 parser.add_argument('--n_heads', type=int, default=1)
 parser.add_argument('--dropout_p', type=float, default=0.1)
 parser.add_argument('--device', type=str, default='cuda:0')
+parser.add_argument('--no_traj_pkl', action='store_true', help='Do not collect or save trajectory PKL; keep simulation CSVs')
 
 
 env_parser = get_env_config()
@@ -271,40 +275,22 @@ def simulate():
         for i in trange(args.num_env_steps, file=sys.stdout):
             actions = agent.act(obs, deterministic=not args.stochastic)
 
-            obs_buffer.append(np.array(obs))
-            act_buffer.append(actions)
+            if not args.no_traj_pkl:
+                obs_buffer.append(np.array(obs))
+                act_buffer.append(actions)
             
             obs, _, rewards, done, infos, _ = env.step(
                 actions, render_mode=render_mode, render_interval=render_interval)
 
-            rew_buffer.append(np.array(rewards))
+            if not args.no_traj_pkl:
+                rew_buffer.append(np.array(rewards))
             step_rewards.append(np.mean(rewards))
 
-        trajectory = {
-            "prompt": traffic_to_prompt[scenario],
-            'observations': np.array(obs_buffer, dtype=np.float32),   # (T, 123)
-            'actions': np.array(act_buffer, dtype=np.float32),        # (T, 2)
-            'rewards': np.array(rew_buffer, dtype=np.float32),        # (T, 1)
-        }
+        if not args.no_traj_pkl:
+            save_traj_pkl(obs_buffer, act_buffer, rew_buffer)
 
-        # if args.seed == 1:
-        save_dir = args.traj_save_path
-        os.makedirs(args.traj_save_path, exist_ok=True)
-        save_path = os.path.join(save_dir, f"c.pkl")
-    
-        if os.path.exists(save_path):
-            with open(save_path, 'rb') as f:
-                data = pickle.load(f)
-        else:
-            data = []
-        
-        data.append(trajectory)
-        # with open(save_path, 'wb') as f:
-        #     pickle.dump(data, f)
-        # print(f"Trajectory saved to: {save_path}")
-    
         rewards = pd.Series(np.squeeze(step_rewards), name='reward')
-    
+
         info = rewards.describe()
         info.index = ['reward_' + str(i) for i in info.index]
         info['time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -316,14 +302,38 @@ def simulate():
         info['w_pc'] = env.w_pc
         info['w_qos'] = env.w_qos
         info['w_xqos'] = env.w_xqos
-        info['w_pc'] = env.w_pc
         print(info)
-    
-        save_path = args.perf_save_path
-        info.to_frame().T.set_index('time').to_csv(
-            save_path, mode='a', header=not os.path.exists(str(save_path)))
+        info.to_frame().T.set_index('time').to_csv(args.perf_save_path, mode='a', header=not os.path.exists(args.perf_save_path))
         if args.use_render and not args.use_dash:
             return env.animate()
+
+def save_traj_pkl(obs_buffer, act_buffer, rew_buffer):
+        trajectory = {
+            # [traffic scenario id (A/B/C -> 0/1/2), number of BSs, area side length in m]
+            "prompt": np.array([traffic_to_prompt[scenario], env.net.num_bs, env.net.area[0]], dtype=np.float32),
+            'observations': np.array(obs_buffer, dtype=np.float32),   # (T, 123)
+            'actions': np.array(act_buffer, dtype=np.float32),        # (T, 2)
+            'rewards': np.array(rew_buffer, dtype=np.float32),        # (T, 1)
+        }
+
+        # if args.seed == 1:
+        save_dir = args.traj_save_path
+        os.makedirs(args.traj_save_path, exist_ok=True)
+        # name by scenario, number of BSs and area side length (not by model)
+        traj_name = args.traj_name or f"{scenario}_{env.net.num_bs}bs_{int(env.net.area[0])}m"
+        save_path = os.path.join(save_dir, f"{traj_name}.pkl")
+    
+        if os.path.exists(save_path):
+            with open(save_path, 'rb') as f:
+                data = pickle.load(f)
+        else:
+            data = []
+        
+        data.append(trajectory)
+        with open(save_path, 'wb') as f:
+            pickle.dump(data, f)
+        print(f"Trajectory saved to: {save_path}")
+    
 
 simulate()
 env.close()

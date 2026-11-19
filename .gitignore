@@ -24,3 +24,13 @@ critic*.pt
 /database/
 __pycache__/
 /dt_results/
+# experiment artifacts (code only in git)
+*.pt
+*.npz
+*.zst
+*.pkl.zst
+/experiments/**/eval*/
+/experiments/**/logs/
+/experiments/**/done/
+/experiments/**/models/
+/logs/

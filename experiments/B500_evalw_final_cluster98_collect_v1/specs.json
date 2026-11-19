@@ -1,0 +1,22 @@
+[
+ {
+  "pc": 3.0,
+  "training_seed": 1,
+  "checkpoint": "final",
+  "tag": "B500evalw_bbcyap5g_cpfinal_cl98",
+  "env": "B500",
+  "training_weights": [
+   40,
+   0.5,
+   0.5,
+   3
+  ],
+  "source": "/workspace/Cell-Free-DT-new/experiments/B500_evalw_final_cluster98_collect_v1/models/B500evalw_bbcyap5g_cpfinal_cl98",
+  "original_source": "/workspace/Cell-Free-DT-new/results/DT/B/mappo/B500_evalw_40_05_05_pc3_seed1_ep300/wandb/run-20261112_015715-bbcyap5g/files/actor.pt",
+  "manifest": {
+   "actor.pt": "be3adb4df7bdd5f52469df673cce18d8698e14fb0be04baff686630d924b329d",
+   "critic.pt": "de6ad8f1951a1c295666355501961056726fddd1ca3ecca6d9acfa46a4245919",
+   "architecture.json": "e50254d5e4e046625ea0b5347261eedaaae0b8ed851b14619937e713a034df84"
+  }
+ }
+]

@@ -25,7 +25,7 @@ w_pc=1
 log_interval=1
 
 wandb_user="qichenw"
-wandb_api_key="e3662fa8db0f243936c7514a1d0c69f2374ce721"
+wandb_api_key="${WANDB_API_KEY:?set WANDB_API_KEY}"
 
 echo "algo is ${algo}, traffic scenario is ${scenario}, max seed is ${seed_max}"
 for seed in `seq ${seed_max}`;

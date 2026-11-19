@@ -15,6 +15,10 @@ class UEStatus(enum.IntEnum):
 class UserEquipment:
     height: float = config.ueHeight
     signal_thresh = config.signalThreshold
+    coverage_gain_fraction = config.coverageGainFraction
+    min_candidate_bs = config.minCandidateBS
+    coverage_gain_fraction_A = config.coverageGainFractionA
+    min_candidate_bs_A = config.minCandidateBSA
     tau_c = config.tau_c
     tau_p = config.tau_p
     record_sinr = True
@@ -92,12 +96,18 @@ class UserEquipment:
     
         # self._cover_bss.update(self.net.get_bs(i) for i in self._sorted_bss[:self.cluster_size])
         total_gain = np.sum(gains)
+        if getattr(self.net, 'scenario', None) == 'A':
+            frac, min_bs = self.coverage_gain_fraction_A, self.min_candidate_bs_A
+        else:
+            frac, min_bs = self.coverage_gain_fraction, self.min_candidate_bs
+        min_bs = min(min_bs, self.net.num_bs)
         cumulative_gain = 0
         self._cover_bss.clear()
         for i in self._sorted_bss:
             cumulative_gain += self._gains[i]
             self._cover_bss.add(self.net.get_bs(i))
-            if cumulative_gain >= 0.9 * total_gain:
+            if (len(self._cover_bss) >= min_bs
+                    and cumulative_gain >= frac * total_gain):
                 break
         self.cluster_size = len(self._cover_bss)
         for b in self._cover_bss:

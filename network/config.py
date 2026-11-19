@@ -42,6 +42,12 @@ noiseSpectralDensity = dB2lin(-174 - 30 + 7)
 
 # user equipment params
 ueHeight = 1.5  # height of a UE in meters
+# UE candidate (cluster) BSs must cover this fraction of total channel gain.
+coverageGainFraction = 0.90
+minCandidateBS = 1
+# scenario A uses a stricter rule
+coverageGainFractionA = 0.98
+minCandidateBSA = 1
 
 # default network configuration
 

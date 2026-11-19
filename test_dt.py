@@ -1,114 +1,83 @@
-import torch
-import csv
+import argparse
+import json
+from pathlib import Path
 import numpy as np
-from utils import *
-from arguments import *
+import torch
+from arguments import get_env_config
 from env import MultiCellNetEnv
-from datetime import datetime
-from decision_transformer.utils import evaluate_on_env
 from decision_transformer.model import DecisionTransformer
+from decision_transformer.utils import evaluate_on_env
 
-
-
-
-def make_env(args, seed=None):
-    kwds = vars(args).copy()
-    kwds['no_interf'] = False  # always has interference at test time
-    env = MultiCellNetEnv(seed=seed, **{
-        k: v for k, v in kwds.items() if v is not None})
-    pars = inspect.signature(MultiCellNetEnv.__init__).parameters
-    # [setattr(args, k, pars[k].default) for k, v in kwds.items() if v is None]
-    for k, v in kwds.items():
-        if v is None and k in pars:
-            setattr(args, k, pars[k].default)
-    return env
-
-
-def test(args, env_args):
-
-    eval_max_eval_ep_len = args.max_eval_ep_len  # max len of one episode
-
-    context_len = args.context_len      # K in decision transformer
-    n_blocks = args.n_blocks            # num of transformer blocks
-    embed_dim = args.embed_dim          # embedding (hidden) dim of transformer
-    n_heads = args.n_heads              # num of transformer heads
-    dropout_p = args.dropout_p          # dropout probability
-
-    device = torch.device(args.device)
-    print("device set to: ", device)
-
-    eval_env = make_env(env_args, seed=args.seed)
-
-    state_dim = eval_env.observation_space[0].shape[0]
-    act_dim = eval_env.action_space[0].shape[0]
-
-    eval_model = DecisionTransformer(
-        state_dim=state_dim,
-        act_dim=act_dim,
-        n_blocks=n_blocks,
-        h_dim=embed_dim,
-        context_len=context_len,
-        n_heads=n_heads,
-        drop_p=dropout_p,
-        max_timestep=25200
-    ).to(device)
-
-    eval_chk_pt_path = f'dt_results/model_{context_len}.pt'
-    eval_model.load_state_dict(torch.load(eval_chk_pt_path, map_location=device))
-    print("model loaded from: " + eval_chk_pt_path)
-
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    result_dir = "dt_results"
-    os.makedirs(result_dir, exist_ok=True)
-    result_path = os.path.join(result_dir, f"eval_results_{timestamp}.csv")
-
-    # evaluate on env
-    rtg_targets = [-200]
-    for target in rtg_targets:
-        results = evaluate_on_env(eval_model, context_len, eval_env, target, eval_max_eval_ep_len)
-
-        eval_avg_pc = results['eval/avg_pc']
-        eval_avg_drop_ratio = results['eval/avg_drop_ratio']
-
-        print("=" * 60 + '\n' +
-              "rtg target: " + str(target) + '\n' +
-              "eval avg pc: " + format(eval_avg_pc, ".4f") + '\n' +
-              "eval avg drop ratio: " + format(eval_avg_drop_ratio, ".4f")
-        )
-
-        eval_env.stats_dir = f'analysis/sim_stats/dt_{target}'
-        eval_env.close()
-
-
-
-if __name__ == "__main__":
-
+def main():
     parser = argparse.ArgumentParser()
-
+    parser.add_argument('--model_path', required=True)
+    parser.add_argument('--target_rtg', type=float, required=True)
+    parser.add_argument('--seeds', nargs='+', type=int, default=[1,2,3,4,5])
+    parser.add_argument('--device', default='cpu')
+    parser.add_argument('--context_len', type=int, default=8)
+    parser.add_argument('--rtg_scale', type=float, default=1)
     parser.add_argument('--max_eval_ep_len', type=int, default=10080)
-    parser.add_argument('--context_len', type=int, default=5)
-    parser.add_argument('--n_blocks', type=int, default=3)
-    parser.add_argument('--embed_dim', type=int, default=128)
-    parser.add_argument('--n_heads', type=int, default=1)
-    parser.add_argument('--dropout_p', type=float, default=0.1)
-
-    parser.add_argument('--seed', type=int, default=1)
-    parser.add_argument('--device', type=str, default='cpu')
-
-    env_parser = get_env_config()
-
-    try:
-        args, env_args = parser.parse_known_args()
-        env_args = env_parser.parse_args(env_args)
-    except:
-        args = parser.parse_args([])
-        env_args = env_parser.parse_args([])
-
-    # seed
-    torch.manual_seed(args.seed)
-    torch.cuda.manual_seed_all(args.seed)
-    np.random.seed(args.seed)
-
+    parser.add_argument('--eval_area', type=float)
+    parser.add_argument('--eval_grid', type=int)
+    parser.add_argument('--eval_cluster', type=float)
+    parser.add_argument('--validate_env_only', action='store_true')
+    args, remaining = parser.parse_known_args()
+    env_args = get_env_config().parse_args(remaining)
     env_args.accelerate = 3000
+    if args.eval_area is not None:
+        if args.eval_grid is None or args.eval_cluster is None:
+            parser.error('--eval_area requires --eval_grid and --eval_cluster')
+        from network import config as nc
+        from network.base_station import BaseStation
+        from network.network import MultiCellNetwork
+        from network.user_equipment import UserEquipment
+        nc.areaSize = np.array([args.eval_area, args.eval_area])
+        nc.numBS = args.eval_grid ** 2
+        nc.interBSDist = args.eval_area / args.eval_grid
+        nc.bsPositions = nc.square_grid_centers(args.eval_grid, args.eval_grid, args.eval_area, args.eval_area)
+        BaseStation.inter_dist = nc.interBSDist / 1000
+        MultiCellNetwork.inter_bs_dist = nc.interBSDist
+        MultiCellNetwork.default_area = nc.areaSize
+        MultiCellNetwork.default_bs_poses = nc.bsPositions
+        MultiCellNetEnv.bs_poses = nc.bsPositions
+        MultiCellNetEnv.num_agents = nc.numBS
+        env_args.area_size = nc.areaSize
+        nc.coverageGainFraction = args.eval_cluster
+        nc.coverageGainFractionA = .98
+        UserEquipment.coverage_gain_fraction = args.eval_cluster
+        UserEquipment.coverage_gain_fraction_A = .98
+        UserEquipment.min_candidate_bs = 1
+        UserEquipment.min_candidate_bs_A = 1
+        print('EVAL_ENV', args.eval_area, nc.numBS, 'INTER_DIST_M', nc.interBSDist,
+              'NEIGHBOR_DIST_KM', BaseStation.inter_dist, 'CLUSTER', args.eval_cluster, flush=True)
+    torch.set_num_threads(1)
+    checkpoint = torch.load(args.model_path, map_location=args.device, weights_only=True)
+    state = checkpoint['model_state_dict']
+    model = DecisionTransformer(state_dim=state['embed_state.weight'].shape[1], act_dim=2,
+        n_blocks=3,h_dim=128,context_len=args.context_len,n_heads=1,drop_p=.1,
+        max_timestep=state['embed_timestep.weight'].shape[0],deployment_prompt='prompt_scale' in state,
+        no_prompt=checkpoint.get('args', {}).get('no_prompt', False)).to(args.device)
+    model.load_state_dict(state)
+    for seed in args.seeds:
+        torch.manual_seed(seed)
+        np.random.seed(seed)
+        env = MultiCellNetEnv(seed=seed, **{k:v for k,v in vars(env_args).items() if v is not None})
+        obs = [bs.get_observation() for bs in env.net.bss.values()]
+        assert np.asarray(obs).shape == (env.num_agents, state['embed_state.weight'].shape[1]), np.asarray(obs).shape
+        print('OBS_SHAPE_OK', np.asarray(obs).shape, flush=True)
+        if args.validate_env_only:
+            return
+        output = Path(env.full_stats_dir)
+        if output.exists():
+            raise FileExistsError(f'Refusing to overwrite {output}')
+        print('SEED_START', seed, 'RTG', args.target_rtg, flush=True)
+        try:
+            result = evaluate_on_env(args,model,torch.device(args.device),args.context_len,env,args.target_rtg,args.rtg_scale,args.max_eval_ep_len)
+        finally:
+            env.close()
+        (output/'evaluation.json').write_text(json.dumps({'seed':seed,'rtg':args.target_rtg,'model':args.model_path,**result}))
+        print('SEED_COMPLETE', seed, flush=True)
+    print('ALL_COMPLETE', flush=True)
 
-    test(args, env_args)
+if __name__ == '__main__':
+    main()

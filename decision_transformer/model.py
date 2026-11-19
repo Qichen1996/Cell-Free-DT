@@ -69,7 +69,7 @@ class Block(nn.Module):
 
 class DecisionTransformer(nn.Module):
     def __init__(self, state_dim, act_dim, n_blocks, h_dim, context_len,
-                 n_heads, drop_p, max_timestep=4096):
+                 n_heads, drop_p, max_timestep=4096, deployment_prompt=False, no_prompt=False):
         super().__init__()
 
         self.state_dim = state_dim
@@ -83,7 +83,13 @@ class DecisionTransformer(nn.Module):
 
         ### projection heads (project to embedding)
         self.embed_ln = nn.LayerNorm(h_dim)
-        self.embed_prompt = nn.Embedding(3, h_dim)
+        self.no_prompt = no_prompt
+        if not no_prompt:
+            self.embed_prompt = nn.Embedding(3, h_dim)
+        self.deployment_prompt = deployment_prompt
+        if deployment_prompt and not no_prompt:
+            self.register_buffer('prompt_scale', torch.tensor([25.0, 1000.0]))
+            self.embed_prompt_env = nn.Linear(2, h_dim)
         self.embed_timestep = nn.Embedding(max_timestep, h_dim)
         self.embed_rtg = torch.nn.Linear(1, h_dim)
         self.embed_state = torch.nn.Linear(state_dim, h_dim)
@@ -140,16 +146,24 @@ class DecisionTransformer(nn.Module):
         # ).permute(0, 2, 1, 3).reshape(B, 2 * T, self.h_dim)
 
         # [B, 1, h_dim]
-        prompt_token = self.embed_prompt(prompts.long()).unsqueeze(1)
+        if self.no_prompt:
+            pass
+        elif self.deployment_prompt:
+            prompt_token = (self.embed_prompt(prompts[:, 0].long()) +
+                            self.embed_prompt_env(prompts[:, 1:].float() / self.prompt_scale)).unsqueeze(1)
+        else:
+            prompt_token = self.embed_prompt(prompts.long()).unsqueeze(1)
         # [B, 1 + 3*T, h_dim]
-        h = torch.cat((prompt_token, h), dim=1)
+        if not self.no_prompt:
+            h = torch.cat((prompt_token, h), dim=1)
 
         h = self.embed_ln(h)
 
         # transformer and prediction
         h = self.transformer(h)
 
-        h = h[:, 1:, :]
+        if not self.no_prompt:
+            h = h[:, 1:, :]
 
         # get h reshaped such that its size = (B x 3 x T x h_dim) and
         # h[:, 0, t] is conditioned on the input sequence r_0, s_0, a_0 ... r_t
